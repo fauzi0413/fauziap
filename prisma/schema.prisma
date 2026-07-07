@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          String    @default("ADMIN")
+  
+  profile       Profile?
+  blogs         Blog[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName     String
+  title        String
+  shortBio     String?  @db.Text
+  fullBio      String?  @db.Text
+  resumeUrl    String?
+  location     String?
+  githubUrl    String?
+  linkedinUrl  String?
+  websiteUrl   String?
+  avatarUrl    String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Technology {
+  id                String              @id @default(cuid())
+  name              String
+  slug              String              @unique
+  icon              String?
+  
+  skills            Skill[]
+  projectTechnology ProjectTechnology[]
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model Skill {
+  id           String      @id @default(cuid())
+  technologyId String
+  technology   Technology  @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+  level        String?     // e.g., "Beginner", "Advanced", or 1-100
+  displayOrder Int         @default(0)
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Experience {
+  id             String    @id @default(cuid())
+  title          String
+  company        String
+  companyLogo    String?
+  location       String?
+  type           String?   // e.g., Full-time, Freelance
+  startDate      DateTime
+  endDate        DateTime?
+  isCurrent      Boolean   @default(false)
+  description    String?   @db.Text
+  responsibilities String? @db.Text
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Education {
+  id              String    @id @default(cuid())
+  institution     String
+  institutionLogo String?
+  degree          String
+  major           String?
+  startDate       DateTime
+  endDate         DateTime?
+  gpa             String?
+  description     String?   @db.Text
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Certificate {
+  id             String    @id @default(cuid())
+  name           String
+  issuer         String
+  issueDate      DateTime
+  expiryDate     DateTime?
+  credentialId   String?
+  credentialUrl  String?
+  image          String?
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Project {
+  id               String               @id @default(cuid())
+  title            String
+  slug             String               @unique
+  thumbnail        String?
+  shortDescription String?              @db.Text
+  fullDescription  String?              @db.Text
+  background       String?              @db.Text
+  objectives       String?              @db.Text
+  solutions        String?              @db.Text
+  architecture     String?              @db.Text
+  challenges       String?              @db.Text
+  lessons          String?              @db.Text
+  repositoryUrl    String?
+  demoUrl          String?
+  
+  images           ProjectImage[]
+  technologies     ProjectTechnology[]
+  
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model ProjectImage {
+  id           String   @id @default(cuid())
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl     String
+  altText      String?
+  displayOrder Int      @default(0)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ProjectTechnology {
+  projectId    String
+  technologyId String
+  
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime   @default(now())
+
+  @@id([projectId, technologyId])
+}
+
+model Blog {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  excerpt     String?  @db.Text
+  coverImage  String?
+  isPublished Boolean  @default(false)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
+
+model Visitor {
+  id        String   @id @default(cuid())
+  ipAddress String?
+  userAgent String?
+  path      String?
+  visitedAt DateTime @default(now())
+}
