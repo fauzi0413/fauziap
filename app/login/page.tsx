@@ -98,7 +98,7 @@ export default function LoginPage() {
                   ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                   : "border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600"
               }`}
-              placeholder="••••••••"
+              placeholder="Masukkan password"
             />
             {errors.password && (
               <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>

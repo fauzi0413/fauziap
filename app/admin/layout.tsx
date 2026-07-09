@@ -9,11 +9,11 @@ export default function AdminLayout({
 }) {
   return (
     <SessionProvider>
-      <div className="flex h-screen bg-gray-50 dark:bg-gray-950 font-sans">
+      <div className="flex h-screen bg-gray-50 font-sans text-gray-950 dark:bg-gray-950 dark:text-white">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Navbar />
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-5 md:p-8">
             {children}
           </main>
         </div>
