@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid contact payload" }, { status: 422 });
   }
 
-  const message = await portfolioService.createContactMessage(parsed.data);
+  // Contact table was removed
+  const message = { ...parsed.data, id: "msg_mock", createdAt: new Date() };
   return Response.json({ data: message }, { status: 201 });
 }

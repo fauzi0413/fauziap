@@ -16,7 +16,7 @@ export function PublicShell({
   children,
 }: {
   profile: Profile | null;
-  settings: SiteSetting | null;
+  settings?: SiteSetting | null;
   children: React.ReactNode;
 }) {
   const name = settings?.siteName || profile?.fullName || "Portfolio";

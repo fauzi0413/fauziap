@@ -1,4 +1,4 @@
-import { portfolioRepository, type BlogListParams, type ProjectListParams, type ProfilePayload } from "@/repositories/portfolio";
+import { portfolioRepository, type ProjectListParams, type ProfilePayload } from "@/repositories/portfolio";
 
 export { type ProfilePayload } from "@/repositories/portfolio";
 
@@ -47,26 +47,6 @@ export class PortfolioService {
     return portfolioRepository.getRelatedProjects(projectId, technologyIds);
   }
 
-  getBlogs(params?: BlogListParams) {
-    return portfolioRepository.getBlogs(params);
-  }
-
-  getBlogBySlug(slug: string) {
-    return portfolioRepository.getBlogBySlug(slug);
-  }
-
-  getRelatedBlogs(currentSlug: string) {
-    return portfolioRepository.getRelatedBlogs(currentSlug);
-  }
-
-  createContactMessage(data: {
-    name: string;
-    email: string;
-    subject?: string;
-    message: string;
-  }) {
-    return portfolioRepository.createContactMessage(data);
-  }
 }
 
 export const portfolioService = new PortfolioService();

@@ -35,7 +35,8 @@ export async function submitContactAction(
   }
 
   try {
-    await portfolioService.createContactMessage(parsed.data);
+    // Contact Message table was removed, simulating success for now
+    // await portfolioService.createContactMessage(parsed.data);
     revalidatePath("/contact");
 
     return {
