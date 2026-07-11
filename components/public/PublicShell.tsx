@@ -1,24 +1,25 @@
 import Link from "next/link";
-import type { Profile } from "@prisma/client";
+import type { Profile, SiteSetting } from "@prisma/client";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { CvModal } from "@/components/public/CvModal";
 
 const navItems = [
   { label: "About", href: "/about" },
-  { label: "Projects", href: "/projects" },
   { label: "Experience", href: "/experience" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
+  { label: "Projects", href: "/projects" },
 ];
 
 export function PublicShell({
   profile,
+  settings,
   children,
 }: {
   profile: Profile | null;
+  settings: SiteSetting | null;
   children: React.ReactNode;
 }) {
-  const name = profile?.fullName ?? "Portfolio";
+  const name = settings?.siteName || profile?.fullName || "Portfolio";
 
   return (
     <div className="min-h-screen bg-[#f7f7f4] text-[#111111]">
@@ -34,13 +35,12 @@ export function PublicShell({
               </Link>
             ))}
           </div>
-          <Link
-            href="/resume"
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-black px-4 text-sm font-semibold text-white transition hover:bg-black/80"
-          >
-            Resume
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <CvModal>
+            <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-black px-4 text-sm font-semibold text-white transition hover:bg-black/80">
+              View CV
+              <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </CvModal>
         </nav>
       </header>
       {children}
@@ -49,13 +49,18 @@ export function PublicShell({
           <div>
             <p className="font-semibold">{name}</p>
             <p className="mt-1 text-sm text-black/55">
-              Personal Portfolio CMS powered by Next.js and Prisma.
+              {settings?.footerText || "Personal Portfolio CMS powered by Next.js."}
             </p>
+          </div>
+          <div className="flex flex-col md:items-end text-sm text-black/55">
+             <p>&copy; {new Date().getFullYear()} {settings?.copyrightName || profile?.fullName || "Developer"}</p>
           </div>
           <div className="flex items-center gap-3">
             {profile?.githubUrl ? (
               <a
                 href={profile.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-md border border-black/10 p-2 transition hover:bg-white"
                 aria-label="GitHub"
               >
@@ -65,20 +70,24 @@ export function PublicShell({
             {profile?.linkedinUrl ? (
               <a
                 href={profile.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-md border border-black/10 p-2 transition hover:bg-white"
                 aria-label="LinkedIn"
               >
                 <FaLinkedin className="h-4 w-4" />
               </a>
             ) : null}
-            {profile?.userId ? (
-              <Link
-                href="/contact"
+            {profile?.email ? (
+              <a
+                href={`mailto:${profile.email}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-md border border-black/10 p-2 transition hover:bg-white"
                 aria-label="Contact"
               >
                 <Mail className="h-4 w-4" />
-              </Link>
+              </a>
             ) : null}
           </div>
         </div>

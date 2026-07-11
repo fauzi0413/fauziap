@@ -1,8 +1,14 @@
-import { portfolioRepository, type BlogListParams, type ProjectListParams } from "@/repositories/portfolio";
+import { portfolioRepository, type BlogListParams, type ProjectListParams, type ProfilePayload } from "@/repositories/portfolio";
+
+export { type ProfilePayload } from "@/repositories/portfolio";
 
 export class PortfolioService {
   getProfile() {
     return portfolioRepository.getProfile();
+  }
+
+  upsertProfile(data: ProfilePayload) {
+    return portfolioRepository.upsertProfile(data);
   }
 
   getSkills() {

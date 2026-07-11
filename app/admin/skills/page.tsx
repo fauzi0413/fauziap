@@ -1,11 +1,23 @@
-import { ModulePlaceholder } from "@/components/admin/ModulePlaceholder";
+import { skillService } from "@/services/skill";
+import { technologyService } from "@/services/technology";
+import SkillTable from "@/components/admin/SkillTable";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
-export default function AdminSkillsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminSkillsPage() {
+  const [skills, technologies] = await Promise.all([
+    skillService.getAll(),
+    technologyService.getAll(),
+  ]);
+
   return (
-    <ModulePlaceholder
-      title="Skill"
-      description="Hubungkan Technology dengan level penguasaan, kategori, urutan, dan status tampil publik."
-      fields={["Technology", "Level", "Category", "Display Order", "Is Public", "Created At"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Skill"
+        description="Hubungkan Technology dengan level penguasaan, kategori, urutan, dan status tampil publik."
+      />
+      <SkillTable initialData={skills} technologies={technologies} />
+    </div>
   );
 }

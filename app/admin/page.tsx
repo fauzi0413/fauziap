@@ -3,10 +3,8 @@ import {
   Briefcase,
   Cpu,
   FileBadge,
-  FileText,
   FolderDot,
   GraduationCap,
-  Mail,
   MousePointerClick,
   Shapes,
 } from "lucide-react";
@@ -29,8 +27,6 @@ export default async function DashboardPage() {
     { title: "Experience", value: stats.experiences, icon: Briefcase, description: "Pengalaman kerja di timeline publik" },
     { title: "Education", value: stats.educations, icon: GraduationCap, description: "Riwayat pendidikan dan akademik" },
     { title: "Certificate", value: stats.certificates, icon: FileBadge, description: "Kredensial yang ditampilkan publik" },
-    { title: "Blog", value: stats.blogs, icon: FileText, description: "Artikel draft dan published" },
-    { title: "Messages", value: stats.messages, icon: Mail, description: "Pesan dari halaman contact" },
     { title: "Visitors", value: stats.visitors, icon: MousePointerClick, description: "Kunjungan yang tercatat" },
   ];
 

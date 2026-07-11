@@ -1,11 +1,19 @@
-import { ModulePlaceholder } from "@/components/admin/ModulePlaceholder";
+import { siteSettingService } from "@/services/site-setting";
+import { SiteSettingForm } from "@/components/admin/SiteSettingForm";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
-export default function AdminSettingsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminSettingsPage() {
+  const settings = await siteSettingService.getSetting();
+
   return (
-    <ModulePlaceholder
-      title="Site Setting"
-      description="Kelola SEO global, favicon, logo, analytics, Open Graph, maintenance mode, footer, dan copyright."
-      fields={["Site Name", "Logo", "Favicon", "SEO Title", "SEO Description", "Google Analytics", "Open Graph", "Twitter Card", "Maintenance Mode", "Footer", "Copyright"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Site Setting"
+        description="Kelola SEO global, favicon, logo, analytics, Open Graph, maintenance mode, footer, dan copyright."
+      />
+      <SiteSettingForm initialData={settings} />
+    </div>
   );
 }

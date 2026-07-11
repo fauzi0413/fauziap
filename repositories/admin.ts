@@ -9,8 +9,6 @@ export class AdminRepository {
       experiences,
       educations,
       certificates,
-      blogs,
-      messages,
       visitors,
     ] = await Promise.all([
       prisma.project.count(),
@@ -19,8 +17,6 @@ export class AdminRepository {
       prisma.experience.count(),
       prisma.education.count(),
       prisma.certificate.count(),
-      prisma.blog.count(),
-      prisma.contactMessage.count(),
       prisma.visitor.count(),
     ]);
 
@@ -31,28 +27,16 @@ export class AdminRepository {
       experiences,
       educations,
       certificates,
-      blogs,
-      messages,
       visitors,
     };
   }
 
   async getRecentActivity() {
-    const [projects, blogs, messages] = await Promise.all([
+    const [projects] = await Promise.all([
       prisma.project.findMany({
         orderBy: { updatedAt: "desc" },
         take: 4,
         select: { id: true, title: true, updatedAt: true },
-      }),
-      prisma.blog.findMany({
-        orderBy: { updatedAt: "desc" },
-        take: 4,
-        select: { id: true, title: true, updatedAt: true, isPublished: true },
-      }),
-      prisma.contactMessage.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 4,
-        select: { id: true, name: true, email: true, createdAt: true, isRead: true },
       }),
     ]);
 
@@ -62,18 +46,6 @@ export class AdminRepository {
         label: item.title,
         type: "Project updated",
         date: item.updatedAt,
-      })),
-      ...blogs.map((item) => ({
-        id: `blog-${item.id}`,
-        label: item.title,
-        type: item.isPublished ? "Blog published" : "Blog draft",
-        date: item.updatedAt,
-      })),
-      ...messages.map((item) => ({
-        id: `message-${item.id}`,
-        label: `${item.name} (${item.email})`,
-        type: item.isRead ? "Message read" : "New message",
-        date: item.createdAt,
       })),
     ]
       .sort((a, b) => b.date.getTime() - a.date.getTime())

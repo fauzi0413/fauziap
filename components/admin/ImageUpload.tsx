@@ -1,0 +1,87 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { upload } from "@vercel/blob/client";
+import { UploadCloud, CheckCircle, Loader2 } from "lucide-react";
+
+interface ImageUploadProps {
+  value: string;
+  onChange: (url: string) => void;
+  label?: string;
+  disabled?: boolean;
+}
+
+export function ImageUpload({ value, onChange, label = "Pilih Gambar & Unggah", disabled = false }: ImageUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const inputFileRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async () => {
+    if (!inputFileRef.current?.files) {
+      return;
+    }
+    const file = inputFileRef.current.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const newBlob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
+      });
+
+      onChange(newBlob.url);
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Gagal mengunggah gambar. Pastikan Anda telah menyetel BLOB_READ_WRITE_TOKEN di file .env");
+    } finally {
+      setIsUploading(false);
+      // Reset input value to allow uploading the same file again if needed
+      if (inputFileRef.current) {
+        inputFileRef.current.value = "";
+      }
+    }
+  };
+
+  const isDisabled = isUploading || disabled;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input
+        ref={inputFileRef}
+        type="file"
+        accept="image/*"
+        onChange={handleUpload}
+        disabled={isDisabled}
+        className="hidden"
+        id={`image-upload-${label.replace(/\s+/g, '-').toLowerCase()}`}
+      />
+      
+      <div className="flex items-center gap-3">
+        <label
+          htmlFor={`image-upload-${label.replace(/\s+/g, '-').toLowerCase()}`}
+          className={`inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 ${
+            isDisabled ? "pointer-events-none opacity-50" : ""
+          }`}
+        >
+          {isUploading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />
+              Mengunggah...
+            </>
+          ) : (
+            <>
+              <UploadCloud className="h-4 w-4 text-gray-400" />
+              {label}
+            </>
+          )}
+        </label>
+        
+        {value && !isUploading && (
+          <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            <CheckCircle className="h-3.5 w-3.5" /> File berhasil diunggah
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -19,6 +19,7 @@ import {
   Microscope,
   ScrollText,
   Settings,
+  ExternalLink,
 } from "lucide-react";
 
 const navigation = [
@@ -30,11 +31,7 @@ const navigation = [
   { name: "Experience", href: "/admin/experience", icon: Briefcase },
   { name: "Education", href: "/admin/education", icon: GraduationCap },
   { name: "Certificate", href: "/admin/certificates", icon: FileBadge },
-  { name: "Research", href: "/admin/research", icon: Microscope },
-  { name: "Blog", href: "/admin/blog", icon: FileText },
-  { name: "Contact Message", href: "/admin/messages", icon: Mail },
   { name: "Visitor Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { name: "Media Library", href: "/admin/media", icon: Images },
   { name: "Resume Setting", href: "/admin/resume", icon: ScrollText },
   { name: "Site Setting", href: "/admin/settings", icon: Settings },
 ];
@@ -72,6 +69,18 @@ export function Sidebar() {
             </Link>
           );
         })}
+      </div>
+      <div className="border-t border-gray-100 p-3 dark:border-gray-800">
+        <Link
+          href="/"
+          target="_blank"
+          className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+        >
+          <span className="flex items-center gap-3">
+            <ExternalLink className="h-4 w-4" />
+            View Public Site
+          </span>
+        </Link>
       </div>
     </div>
   );

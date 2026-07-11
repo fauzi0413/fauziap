@@ -1,11 +1,23 @@
-import { ModulePlaceholder } from "@/components/admin/ModulePlaceholder";
+import { experienceService } from "@/services/experience";
+import { technologyService } from "@/services/technology";
+import ExperienceTable from "@/components/admin/ExperienceTable";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
-export default function AdminExperiencePage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminExperiencePage() {
+  const [experiences, technologies] = await Promise.all([
+    experienceService.getAll(),
+    technologyService.getAll(),
+  ]);
+
   return (
-    <ModulePlaceholder
-      title="Experience"
-      description="Kelola timeline pengalaman kerja dan teknologi yang digunakan selama bekerja."
-      fields={["Company", "Company Logo", "Position", "Location", "Employment Type", "Start Date", "End Date", "Current", "Description", "Technologies"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Experience"
+        description="Kelola timeline pengalaman kerja dan teknologi yang digunakan selama bekerja."
+      />
+      <ExperienceTable initialData={experiences} technologies={technologies} />
+    </div>
   );
 }

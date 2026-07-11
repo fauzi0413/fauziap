@@ -19,7 +19,6 @@ model User {
   role          String    @default("ADMIN")
   
   profile       Profile?
-  blogs         Blog[]
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -35,6 +34,8 @@ model Profile {
   fullBio      String?  @db.Text
   resumeUrl    String?
   location     String?
+  phone        String?
+  email        String?
   githubUrl    String?
   linkedinUrl  String?
   websiteUrl   String?
@@ -50,8 +51,9 @@ model Technology {
   slug              String              @unique
   icon              String?
   
-  skills            Skill[]
-  projectTechnology ProjectTechnology[]
+  skills                Skill[]
+  projectTechnology     ProjectTechnology[]
+  experienceTechnology  ExperienceTechnology[]
   
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -61,7 +63,9 @@ model Skill {
   id           String      @id @default(cuid())
   technologyId String
   technology   Technology  @relation(fields: [technologyId], references: [id], onDelete: Cascade)
-  level        String?     // e.g., "Beginner", "Advanced", or 1-100
+  level        String?     // e.g., "Beginner", "Intermediate", "Advanced", "Expert"
+  category     String?     // e.g., "Frontend", "Backend", "DevOps"
+  isPublic     Boolean     @default(true)
   displayOrder Int         @default(0)
   
   createdAt    DateTime    @default(now())
@@ -81,8 +85,22 @@ model Experience {
   description    String?   @db.Text
   responsibilities String? @db.Text
   
+  technologies   ExperienceTechnology[]
+  
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+model ExperienceTechnology {
+  experienceId String
+  technologyId String
+  
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime   @default(now())
+  
+  @@id([experienceId, technologyId])
 }
 
 model Education {
@@ -109,6 +127,7 @@ model Certificate {
   credentialId   String?
   credentialUrl  String?
   image          String?
+  isPublic       Boolean   @default(true)
   
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -129,6 +148,8 @@ model Project {
   lessons          String?              @db.Text
   repositoryUrl    String?
   demoUrl          String?
+  isPublished      Boolean              @default(false)
+  isFeatured       Boolean              @default(false)
   
   images           ProjectImage[]
   technologies     ProjectTechnology[]
@@ -161,36 +182,60 @@ model ProjectTechnology {
   @@id([projectId, technologyId])
 }
 
-model Blog {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  content     String   @db.Text
-  excerpt     String?  @db.Text
-  coverImage  String?
-  isPublished Boolean  @default(false)
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String?
-  message   String   @db.Text
-  isRead    Boolean  @default(false)
-  
-  createdAt DateTime @default(now())
-}
 
 model Visitor {
   id        String   @id @default(cuid())
   ipAddress String?
+  
+  // Data detail perangkat
   userAgent String?
+  browser   String?
+  os        String?
+  device    String?
+  
+  // Lokasi
+  country   String?
+  city      String?
+  
+  // Navigasi
   path      String?
+  referer   String?
+  
   visitedAt DateTime @default(now())
+}
+
+model ResumeSetting {
+  id               String   @id @default(cuid())
+  
+  showExperience   Boolean  @default(true)
+  showEducation    Boolean  @default(true)
+  showProjects     Boolean  @default(true)
+  showCertificates Boolean  @default(false)
+  showSkills       Boolean  @default(true)
+  
+  sectionOrder     String?  @db.Text 
+  isAtsOptimized   Boolean  @default(true)
+  
+  updatedAt        DateTime @updatedAt
+}
+
+model SiteSetting {
+  id                String   @id @default(cuid())
+  
+  siteName          String   @default("Personal Portfolio")
+  logoUrl           String?
+  faviconUrl        String?
+  
+  seoTitle          String?
+  seoDescription    String?  @db.Text
+  openGraphImage    String?
+  twitterHandle     String?
+  
+  googleAnalyticsId String?
+  maintenanceMode   Boolean  @default(false)
+  
+  footerText        String?  @db.Text
+  copyrightName     String?
+  
+  updatedAt         DateTime @updatedAt
 }

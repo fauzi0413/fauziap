@@ -1,11 +1,19 @@
-import { ModulePlaceholder } from "@/components/admin/ModulePlaceholder";
+import { projectService } from "@/services/project";
+import ProjectTable from "@/components/admin/ProjectTable";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
-export default function AdminProjectsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminProjectsPage() {
+  const projects = await projectService.getAll();
+
   return (
-    <ModulePlaceholder
-      title="Project"
-      description="Kelola case study lengkap, gallery screenshot, teknologi, status publish, dan featured project."
-      fields={["Title", "Slug", "Thumbnail", "Short Description", "Full Description", "Background", "Objectives", "Solution", "Architecture", "Challenges", "Lessons Learned", "Repository URL", "Demo URL", "Documentation", "Featured", "Publish Status", "Gallery", "Technologies"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Project"
+        description="Kelola case study lengkap, gallery screenshot, teknologi, status publish, dan featured project."
+      />
+      <ProjectTable initialData={projects} />
+    </div>
   );
 }

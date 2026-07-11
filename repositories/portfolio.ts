@@ -9,10 +9,20 @@ export type ProjectListParams = {
   pageSize?: number;
 };
 
-export type BlogListParams = {
-  query?: string;
-  page?: number;
-  pageSize?: number;
+
+export interface ProfilePayload {
+  fullName: string;
+  title: string;
+  shortBio?: string | null;
+  fullBio?: string | null;
+  resumeUrl?: string | null;
+  location?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  githubUrl?: string | null;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
+  avatarUrl?: string | null;
 };
 
 export class PortfolioRepository {
@@ -20,6 +30,27 @@ export class PortfolioRepository {
     return prisma.profile.findFirst({
       orderBy: { updatedAt: "desc" },
       include: { user: true },
+    });
+  }
+
+  async upsertProfile(data: ProfilePayload) {
+    const existing = await prisma.profile.findFirst({
+      orderBy: { updatedAt: "desc" },
+    });
+
+    if (existing) {
+      return prisma.profile.update({
+        where: { id: existing.id },
+        data,
+      });
+    }
+
+    // Fallback: create profile linked to the first user found
+    const user = await prisma.user.findFirst();
+    if (!user) throw new Error("Tidak ada user yang terdaftar.");
+
+    return prisma.profile.create({
+      data: { ...data, userId: user.id },
     });
   }
 
@@ -142,63 +173,7 @@ export class PortfolioRepository {
     });
   }
 
-  async getBlogs(params: BlogListParams = {}) {
-    const page = Math.max(params.page ?? 1, 1);
-    const pageSize = Math.min(Math.max(params.pageSize ?? 6, 1), 18);
-    const where: Prisma.BlogWhereInput = {
-      isPublished: true,
-    };
 
-    if (params.query) {
-      where.OR = [
-        { title: { contains: params.query, mode: "insensitive" } },
-        { excerpt: { contains: params.query, mode: "insensitive" } },
-        { content: { contains: params.query, mode: "insensitive" } },
-      ];
-    }
-
-    const [items, total] = await Promise.all([
-      prisma.blog.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: { author: true },
-      }),
-      prisma.blog.count({ where }),
-    ]);
-
-    return {
-      items,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.max(Math.ceil(total / pageSize), 1),
-    };
-  }
-
-  getBlogBySlug(slug: string) {
-    return prisma.blog.findUnique({
-      where: { slug },
-      include: { author: true },
-    });
-  }
-
-  getRelatedBlogs(currentSlug: string) {
-    return prisma.blog.findMany({
-      where: {
-        slug: { not: currentSlug },
-        isPublished: true,
-      },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-      include: { author: true },
-    });
-  }
-
-  createContactMessage(data: Prisma.ContactMessageCreateInput) {
-    return prisma.contactMessage.create({ data });
-  }
 }
 
 export const portfolioRepository = new PortfolioRepository();

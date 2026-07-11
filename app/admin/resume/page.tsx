@@ -1,11 +1,19 @@
-import { ModulePlaceholder } from "@/components/admin/ModulePlaceholder";
+import { resumeSettingService } from "@/services/resume-setting";
+import { ResumeSettingForm } from "@/components/admin/ResumeSettingForm";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
-export default function AdminResumePage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminResumePage() {
+  const settings = await resumeSettingService.getSetting();
+
   return (
-    <ModulePlaceholder
-      title="Resume Setting"
-      description="Atur tema resume PDF, urutan section, dan visibilitas project/sertifikat tanpa mengubah kode."
-      fields={["Theme Color", "Section Order", "Show Projects", "Show Certificates", "Show Skills", "Template", "PDF Settings"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Resume & CV Settings"
+        description="Atur struktur data, urutan prioritas seksi, dan format output untuk mesin pencari kerja (ATS Optimization)."
+      />
+      <ResumeSettingForm initialData={settings} />
+    </div>
   );
 }
