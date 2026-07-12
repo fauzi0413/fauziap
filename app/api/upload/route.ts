@@ -1,39 +1,24 @@
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as HandleUploadBody;
-
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (pathname: string) => {
-        // Generate a client token for the browser to upload the file
-        // Here you would normally authenticate the user
-        // We will restrict uploads to images
-        return {
-          allowedContentTypes: [
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-            'image/webp',
-            'image/svg+xml',
-          ],
-          clientPayload: JSON.stringify({ pathname }),
-        };
-      },
-      onUploadCompleted: async ({ blob, tokenPayload }: { blob: { url: string }, tokenPayload?: any }) => {
-        // Optional logic when upload is successfully completed
-        console.log('Upload completed:', blob.url);
-      },
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const blob = await put(file.name, file, {
+      access: 'public',
     });
 
-    return NextResponse.json(jsonResponse);
+    return NextResponse.json(blob);
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message },
-      { status: 400 } // Bad Request
+      { status: 500 }
     );
   }
 }

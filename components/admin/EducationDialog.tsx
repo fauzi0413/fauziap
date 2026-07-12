@@ -37,6 +37,7 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
   const [startDate, setStartDate] = useState(toDateInput(edu?.startDate));
   const [endDate, setEndDate] = useState(toDateInput(edu?.endDate));
   const [gpa, setGpa] = useState(edu?.gpa ?? "");
+  const [predicate, setPredicate] = useState(edu?.predicate ?? "");
   const [description, setDescription] = useState(edu?.description ?? "");
   const [isPending, startTransition] = useTransition();
   const firstInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +51,7 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
       setStartDate(toDateInput(edu?.startDate));
       setEndDate(toDateInput(edu?.endDate));
       setGpa(edu?.gpa ?? "");
+      setPredicate(edu?.predicate ?? "");
       setDescription(edu?.description ?? "");
       setTimeout(() => firstInputRef.current?.focus(), 50);
     }
@@ -66,6 +68,7 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
       startDate,
       endDate: endDate || null,
       gpa: gpa.trim() || null,
+      predicate: predicate.trim() || null,
       description: description.trim() || null,
     };
 
@@ -223,6 +226,18 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
                   value={gpa}
                   onChange={(e) => setGpa(e.target.value)}
                   placeholder="e.g. 3.85"
+                  className={inputClass}
+                />
+              </div>
+              <div className="sm:col-span-3">
+                <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                  Predikat / Predicate
+                </label>
+                <input
+                  type="text"
+                  value={predicate}
+                  onChange={(e) => setPredicate(e.target.value)}
+                  placeholder="e.g. Cum Laude, Summa Cum Laude"
                   className={inputClass}
                 />
               </div>

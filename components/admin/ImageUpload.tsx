@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { upload } from "@vercel/blob/client";
 import { UploadCloud, CheckCircle, Loader2 } from "lucide-react";
 
 interface ImageUploadProps {
@@ -24,15 +23,23 @@ export function ImageUpload({ value, onChange, label = "Pilih Gambar & Unggah", 
 
     setIsUploading(true);
     try {
-      const newBlob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
       });
 
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      const newBlob = await response.json();
       onChange(newBlob.url);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Gagal mengunggah gambar. Pastikan Anda telah menyetel BLOB_READ_WRITE_TOKEN di file .env");
+      alert("Gagal mengunggah gambar. Cek konsol atau pastikan konfigurasi Vercel Blob token benar.");
     } finally {
       setIsUploading(false);
       // Reset input value to allow uploading the same file again if needed

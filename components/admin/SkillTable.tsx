@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Edit, Plus, Search, Trash2, Eye, EyeOff } from "lucide-react";
 import type { Skill, Technology } from "@prisma/client";
 
-export type SkillWithTechnology = Skill & { technology: Technology };
+export type SkillWithTechnology = Skill & { technology: Technology | null };
 
 const LEVEL_COLOR: Record<string, string> = {
   Beginner:     "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
@@ -41,7 +41,7 @@ export default function SkillTable({
     const q = query.toLowerCase().trim();
     if (!q) return initialData;
     return initialData.filter((skill) =>
-      [skill.technology.name, skill.level, skill.category]
+      [skill.type === "HARD" ? skill.technology?.name : skill.name, skill.level, skill.category, skill.type]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()
@@ -78,6 +78,7 @@ export default function SkillTable({
           mode={dialog.mode}
           open={dialog.open}
           technologies={technologies}
+          skills={initialData}
           onClose={closeDialog}
           onSuccess={onSuccess}
         />
@@ -112,8 +113,8 @@ export default function SkillTable({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">No</TableHead>
-                <TableHead className="w-16">Icon</TableHead>
-                <TableHead>Teknologi</TableHead>
+                <TableHead className="w-16">Tipe</TableHead>
+                <TableHead>Nama Skill</TableHead>
                 <TableHead>Level</TableHead>
                 <TableHead>Kategori</TableHead>
                 <TableHead className="w-24 text-center">Urutan</TableHead>
@@ -133,22 +134,29 @@ export default function SkillTable({
                   <TableRow key={skill.id}>
                     <TableCell className="text-gray-400">{i + 1}</TableCell>
 
-                    {/* Icon */}
+                    {/* Skill Type */}
                     <TableCell>
-                      {skill.technology.icon?.startsWith("http") ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={skill.technology.icon}
-                          alt={skill.technology.name}
-                          className="h-7 w-7 rounded object-contain"
-                        />
+                      {skill.type === "HARD" ? (
+                         <span className="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-700 rounded-md dark:bg-blue-900 dark:text-blue-200">Hard</span>
                       ) : (
-                        <span className="text-xs text-gray-400">—</span>
+                         <span className="text-xs font-semibold px-2 py-1 bg-purple-100 text-purple-700 rounded-md dark:bg-purple-900 dark:text-purple-200">Soft</span>
                       )}
                     </TableCell>
 
-                    {/* Technology name */}
-                    <TableCell className="font-medium">{skill.technology.name}</TableCell>
+                    {/* Technology name or Soft Skill name */}
+                    <TableCell>
+                      {skill.type === "HARD" && skill.technology ? (
+                        <div className="flex items-center gap-2">
+                           {skill.technology.icon?.startsWith("http") && (
+                             // eslint-disable-next-line @next/next/no-img-element
+                             <img src={skill.technology.icon} alt="" className="h-5 w-5 rounded object-contain" />
+                           )}
+                           <span className="font-medium">{skill.technology.name}</span>
+                        </div>
+                      ) : (
+                        <span className="font-medium">{skill.name}</span>
+                      )}
+                    </TableCell>
 
                     {/* Level badge */}
                     <TableCell>
@@ -194,14 +202,14 @@ export default function SkillTable({
 
                     {/* Actions */}
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
+                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(skill)} title="Edit">
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(skill.id, skill.technology.name)}
+                          onClick={() => handleDelete(skill.id, skill.type === "HARD" ? skill.technology?.name ?? "Skill" : skill.name ?? "Skill")}
                           disabled={deletingId === skill.id}
                           className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
                           title="Hapus"

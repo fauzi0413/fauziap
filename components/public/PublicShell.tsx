@@ -5,7 +5,9 @@ import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { CvModal } from "@/components/public/CvModal";
 
 const navItems = [
+  { label: "Overview", href: "/" },
   { label: "About", href: "/about" },
+  { label: "Education", href: "/education" },
   { label: "Experience", href: "/experience" },
   { label: "Projects", href: "/projects" },
 ];
@@ -53,7 +55,7 @@ export function PublicShell({
             </p>
           </div>
           <div className="flex flex-col md:items-end text-sm text-black/55">
-             <p>&copy; {new Date().getFullYear()} {settings?.copyrightName || profile?.fullName || "Developer"}</p>
+             <p>&copy; {new Date().getFullYear()} {settings?.copyrightName || "Developer"}</p>
           </div>
           <div className="flex items-center gap-3">
             {profile?.githubUrl ? (

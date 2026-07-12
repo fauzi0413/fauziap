@@ -17,38 +17,66 @@ interface SkillDialogProps {
   mode: Mode;
   open: boolean;
   technologies: Technology[];
+  skills: SkillWithTechnology[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function SkillDialog({ mode, open, technologies, onClose, onSuccess }: SkillDialogProps) {
+export function SkillDialog({ mode, open, technologies, skills, onClose, onSuccess }: SkillDialogProps) {
   const isEdit = mode.type === "edit";
   const skill = isEdit ? mode.skill : null;
 
+  const usedTechnologyIds = new Set(
+    skills
+      .filter((s) => s.type === "HARD" && s.technologyId)
+      .map((s) => s.technologyId)
+  );
+
+  const availableTechnologies = technologies.filter((tech) => {
+    if (usedTechnologyIds.has(tech.id)) {
+      return isEdit && skill?.technologyId === tech.id;
+    }
+    return true;
+  });
+
+  const [type, setType] = useState<"HARD" | "SOFT">(skill?.type as "HARD" | "SOFT" ?? "HARD");
+  const [name, setName] = useState(skill?.name ?? "");
   const [technologyId, setTechnologyId] = useState(skill?.technologyId ?? "");
   const [level, setLevel] = useState(skill?.level ?? "");
   const [category, setCategory] = useState(skill?.category ?? "");
   const [isPublic, setIsPublic] = useState(skill?.isPublic ?? true);
   const [displayOrder, setDisplayOrder] = useState(String(skill?.displayOrder ?? 0));
   const [isPending, startTransition] = useTransition();
-  const firstInputRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
     if (open) {
+      setType(skill?.type as "HARD" | "SOFT" ?? "HARD");
+      setName(skill?.name ?? "");
       setTechnologyId(skill?.technologyId ?? "");
       setLevel(skill?.level ?? "");
       setCategory(skill?.category ?? "");
       setIsPublic(skill?.isPublic ?? true);
       setDisplayOrder(String(skill?.displayOrder ?? 0));
-      setTimeout(() => firstInputRef.current?.focus(), 50);
     }
-  }, [open, mode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, mode]); 
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    if (type === "HARD" && !technologyId) {
+      toast.error("Teknologi harus dipilih untuk Hard Skill.");
+      return;
+    }
+
+    if (type === "SOFT" && !name) {
+      toast.error("Nama Soft Skill harus disi.");
+      return;
+    }
+
     const payload = {
-      technologyId,
+      type,
+      name: type === "SOFT" ? name : null,
+      technologyId: type === "HARD" ? technologyId : null,
       level: level || null,
       category: category || null,
       isPublic,
@@ -86,7 +114,7 @@ export function SkillDialog({ mode, open, technologies, onClose, onSuccess }: Sk
               {isEdit ? "Edit Skill" : "Tambah Skill"}
             </h2>
             <p className="mt-0.5 text-xs text-gray-400">
-              Pilih teknologi yang dikuasai dan tentukan level keahliannya.
+              Kelola keahlian hard skill (teknologi) atau soft skill Anda.
             </p>
           </div>
           <button
@@ -98,24 +126,61 @@ export function SkillDialog({ mode, open, technologies, onClose, onSuccess }: Sk
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-          {/* Technology */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
-              Teknologi <span className="text-red-500">*</span>
-            </label>
-            <select
-              ref={firstInputRef}
-              required
-              value={technologyId}
-              onChange={(e) => setTechnologyId(e.target.value)}
-              className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-gray-600 dark:focus:bg-gray-800"
+          {/* Skill Type Switch */}
+          <div className="flex p-1 bg-gray-100 rounded-lg dark:bg-gray-900 border border-black/5 dark:border-white/5">
+            <button
+              type="button"
+              onClick={() => setType("HARD")}
+              className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                type === "HARD" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
             >
-              <option value="" disabled>Pilih teknologi…</option>
-              {technologies.map((tech) => (
-                <option key={tech.id} value={tech.id}>{tech.name}</option>
-              ))}
-            </select>
+              Hard Skill
+            </button>
+            <button
+              type="button"
+              onClick={() => setType("SOFT")}
+              className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                type === "SOFT" ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white" : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
+            >
+              Soft Skill
+            </button>
           </div>
+
+          {/* Conditional Name/Technology */}
+          {type === "HARD" ? (
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                Teknologi <span className="text-red-500">*</span>
+              </label>
+              <select
+                required
+                value={technologyId}
+                onChange={(e) => setTechnologyId(e.target.value)}
+                className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-gray-600 dark:focus:bg-gray-800"
+              >
+                <option value="" disabled>Pilih teknologi…</option>
+                {availableTechnologies.map((tech) => (
+                  <option key={tech.id} value={tech.id}>{tech.name}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+             <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                Nama Soft Skill <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Leadership, Problem Solving..."
+                className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-gray-600 dark:focus:bg-gray-800"
+              />
+            </div>
+          )}
 
           {/* Level */}
           <div>
@@ -136,23 +201,24 @@ export function SkillDialog({ mode, open, technologies, onClose, onSuccess }: Sk
           </div>
 
           {/* Category */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
-              Kategori
-            </label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g. Frontend, Backend, DevOps…"
-              list="category-suggestions"
-              className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600 dark:focus:border-gray-600 dark:focus:bg-gray-800"
-            />
-            <datalist id="category-suggestions">
-              {CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
-            </datalist>
-            <p className="mt-1 text-xs text-gray-400">Untuk pengelompokan di halaman Skills publik.</p>
-          </div>
+          {type === "HARD" && (
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                Kategori
+              </label>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="e.g. Frontend, Backend, DevOps…"
+                list="category-suggestions"
+                className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600 dark:focus:border-gray-600 dark:focus:bg-gray-800"
+              />
+              <datalist id="category-suggestions">
+                {CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
+              </datalist>
+            </div>
+          )}
 
           {/* Display Order + Is Public */}
           <div className="grid grid-cols-2 gap-4">
@@ -167,7 +233,6 @@ export function SkillDialog({ mode, open, technologies, onClose, onSuccess }: Sk
                 onChange={(e) => setDisplayOrder(e.target.value)}
                 className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-gray-600 dark:focus:bg-gray-800"
               />
-              <p className="mt-1 text-xs text-gray-400">Angka kecil = tampil duluan.</p>
             </div>
 
             <div>
@@ -194,7 +259,7 @@ export function SkillDialog({ mode, open, technologies, onClose, onSuccess }: Sk
             <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               Batal
             </Button>
-            <Button type="submit" disabled={isPending || !technologyId}>
+            <Button type="submit" disabled={isPending || (type === "HARD" ? !technologyId : !name)}>
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

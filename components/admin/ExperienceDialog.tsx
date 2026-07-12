@@ -7,7 +7,7 @@ import { createExperienceAction, updateExperienceAction } from "@/actions/experi
 import { convertGoogleDriveUrl } from "@/utils/media";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { toast } from "sonner";
-import type { Technology } from "@prisma/client";
+import type { Technology, Education } from "@prisma/client";
 import type { ExperienceWithRelations } from "@/components/admin/ExperienceTable";
 
 type Mode = { type: "create" } | { type: "edit"; experience: ExperienceWithRelations };
@@ -16,6 +16,7 @@ interface ExperienceDialogProps {
   mode: Mode;
   open: boolean;
   technologies: Technology[];
+  educations: Education[];
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -70,7 +71,7 @@ function TechSelect({ technologies, selected, onChange }: {
   );
 }
 
-export function ExperienceDialog({ mode, open, technologies, onClose, onSuccess }: ExperienceDialogProps) {
+export function ExperienceDialog({ mode, open, technologies, educations, onClose, onSuccess }: ExperienceDialogProps) {
   const isEdit = mode.type === "edit";
   const exp = isEdit ? mode.experience : null;
 
@@ -87,6 +88,8 @@ export function ExperienceDialog({ mode, open, technologies, onClose, onSuccess 
   
   const [description, setDescription] = useState(exp?.description ?? "");
   const [responsibilities, setResponsibilities] = useState(exp?.responsibilities ?? "");
+  const [isFeatured, setIsFeatured] = useState(exp?.isFeatured ?? false);
+  const [educationId, setEducationId] = useState(exp?.educationId ?? "");
   
   const [selectedTechIds, setSelectedTechIds] = useState<string[]>(
     exp?.technologies.map((t) => t.technologyId) ?? []
@@ -108,6 +111,8 @@ export function ExperienceDialog({ mode, open, technologies, onClose, onSuccess 
       setIsCurrent(exp?.isCurrent ?? false);
       setDescription(exp?.description ?? "");
       setResponsibilities(exp?.responsibilities ?? "");
+      setIsFeatured(exp?.isFeatured ?? false);
+      setEducationId(exp?.educationId ?? "");
       setSelectedTechIds(exp?.technologies.map((t) => t.technologyId) ?? []);
       
       setTimeout(() => firstInputRef.current?.focus(), 50);
@@ -131,9 +136,11 @@ export function ExperienceDialog({ mode, open, technologies, onClose, onSuccess 
       startDate,
       endDate: isCurrent ? null : (endDate || null),
       isCurrent,
+      isFeatured,
       description: description.trim() || null,
       responsibilities: responsibilities.trim() || null,
       technologyIds: selectedTechIds,
+      educationId: educationId || null,
     };
 
     startTransition(async () => {
@@ -293,7 +300,7 @@ export function ExperienceDialog({ mode, open, technologies, onClose, onSuccess 
                     className={`${inputClass} disabled:opacity-50`}
                   />
                 </div>
-                <div className="flex items-center pt-8">
+                <div className="flex flex-col items-start gap-3 pt-8">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <input
                       type="checkbox"
@@ -303,8 +310,36 @@ export function ExperienceDialog({ mode, open, technologies, onClose, onSuccess 
                     />
                     Sampai Sekarang
                   </label>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300" title="Tampilkan di sorotan halaman About">
+                    <input
+                      type="checkbox"
+                      checked={isFeatured}
+                      onChange={(e) => setIsFeatured(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600 dark:border-gray-600 dark:bg-gray-800 dark:ring-offset-gray-900 dark:focus:ring-white"
+                    />
+                    Featured Experience
+                  </label>
                 </div>
               </div>
+            </div>
+
+            {/* 2.5 Relasi Pendidikan */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                Pendidikan Terkait (Opsional)
+              </label>
+              <select
+                value={educationId}
+                onChange={(e) => setEducationId(e.target.value)}
+                className={`${inputClass} mb-2`}
+              >
+                <option value="">-- Tidak Terkait Pendidikan Manapun --</option>
+                {educations.map((edu) => (
+                  <option key={edu.id} value={edu.id}>
+                    {edu.institution} ({edu.degree})
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* 3. Details */}

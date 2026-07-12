@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { createProjectAction, updateProjectAction } from "@/actions/project";
 import { convertGoogleDriveUrl, generateSlug, isGoogleDriveLink, extractDriveFolderId, isGoogleDriveFolderLink } from "@/utils/media";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import type { Technology } from "@prisma/client";
+import type { Technology, Experience, Education } from "@prisma/client";
 import type { ProjectWithRelations } from "@/components/admin/ProjectTable";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -252,9 +252,13 @@ function ToggleButton({ active, onLabel, offLabel, onIcon, offIcon, onClick }: {
 export function ProjectForm({
   project,
   technologies,
+  experiences,
+  educations,
 }: {
   project?: ProjectWithRelations | null;
   technologies: Technology[];
+  experiences: Experience[];
+  educations: Education[];
 }) {
   const router = useRouter();
   const isEdit = !!project;
@@ -269,6 +273,10 @@ export function ProjectForm({
   const [thumbnailErr, setThumbnailErr] = useState(false);
   const [shortDescription, setShortDescription] = useState(project?.shortDescription ?? "");
   const [fullDescription, setFullDescription] = useState(project?.fullDescription ?? "");
+
+  // Context relations
+  const [experienceId, setExperienceId] = useState(project?.experienceId ?? "");
+  const [educationId, setEducationId] = useState(project?.educationId ?? "");
 
   // Detailed sections
   const [background, setBackground] = useState(project?.background ?? "");
@@ -328,6 +336,8 @@ export function ProjectForm({
       demoUrl: demoUrl.trim() || null,
       isPublished,
       isFeatured,
+      experienceId: experienceId || undefined,
+      educationId: educationId || undefined,
       technologyIds: selectedTechIds,
       images: images.map((img, idx) => ({
         imageUrl: img.url,
@@ -424,7 +434,7 @@ export function ProjectForm({
                 value={thumbnailRaw}
                 onChange={(e) => handleThumbnailChange(e.target.value)}
                 placeholder="https://… atau drive.google.com/file/d/…"
-                className="h-10 flex-1 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600"
+                className="h-10 flex-1 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600"
               />
               {thumbnailUrl && (
                 <div className="h-10 w-16 overflow-hidden rounded border border-gray-200 dark:border-gray-700 shrink-0">
@@ -477,6 +487,46 @@ export function ProjectForm({
         </div>
       </div>
 
+      {/* ── Context Relations ── */}
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+        <SectionTitle>Konteks Hubungan (Opsional)</SectionTitle>
+        <p className="mb-4 mt-1 text-xs text-gray-400">
+          Tentukan pada saat kapan atau di mana project ini dikerjakan untuk menampilkan relasi yang lebih jelas di profil.
+        </p>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <Label>Pilih Pengalaman Kerja</Label>
+            <select
+              value={experienceId}
+              onChange={(e) => setExperienceId(e.target.value)}
+              className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+            >
+              <option value="">— Tidak terhubung —</option>
+              {experiences.map((exp) => (
+                <option key={exp.id} value={exp.id}>
+                  {exp.title} di {exp.company}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label>Pilih Pendidikan</Label>
+            <select
+              value={educationId}
+              onChange={(e) => setEducationId(e.target.value)}
+              className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+            >
+              <option value="">— Tidak terhubung —</option>
+              {educations.map((edu) => (
+                <option key={edu.id} value={edu.id}>
+                  {edu.degree} di {edu.institution}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* ── Gallery ── */}
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
         <SectionTitle>Gallery Screenshot ({images.length} foto)</SectionTitle>
@@ -523,9 +573,10 @@ export function ProjectForm({
               type="text"
               value={repositoryUrl}
               onChange={(e) => setRepositoryUrl(e.target.value)}
-              placeholder="https://github.com/username/repo"
+              placeholder="https://github.com/a/repo1, https://github.com/b/repo2"
               className={inputCls}
             />
+            <p className="mt-1 text-xs text-gray-400">Gunakan koma (,) jika ada lebih dari 1 link repository.</p>
           </div>
           <div>
             <Label>Demo URL</Label>
@@ -533,16 +584,17 @@ export function ProjectForm({
               type="text"
               value={demoUrl}
               onChange={(e) => setDemoUrl(e.target.value)}
-              placeholder="https://yourdomain.com"
+              placeholder="Web|https://domain.com, Kaggle|https://kaggle.com"
               className={inputCls}
             />
+            <p className="mt-1 text-xs text-gray-400">Pisahkan dengan koma (,) jika &gt; 1. Untuk label khusus gunakan (|) contoh: <code>Vercel|https://...</code></p>
           </div>
         </div>
       </div>
 
       {/* ── Submit ── */}
       <div className="flex items-center justify-between">
-        <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
+        <Button type="button" variant="outline" onClick={() => router.push("/admin/projects")} disabled={isPending}>
           ← Kembali
         </Button>
         <Button type="submit" disabled={isPending || !title.trim()}>

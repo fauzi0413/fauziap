@@ -3,9 +3,20 @@ import type { Prisma } from "@prisma/client";
 
 export class TechnologyRepository {
   async findAll() {
-    return prisma.technology.findMany({
-      orderBy: { createdAt: "desc" },
+    const technologies = await prisma.technology.findMany({
+      include: { skills: { select: { displayOrder: true } } }
     });
+
+    return technologies
+      .sort((a, b) => {
+        const orderA = a.skills[0]?.displayOrder ?? 999;
+        const orderB = b.skills[0]?.displayOrder ?? 999;
+        return orderA - orderB || a.name.localeCompare(b.name);
+      })
+      .map((t) => {
+        const { skills, ...rest } = t;
+        return rest;
+      });
   }
 
   async findById(id: string) {

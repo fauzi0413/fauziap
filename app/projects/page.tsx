@@ -25,7 +25,7 @@ export default async function ProjectsPage({
   const page = Number(value(params.page) ?? "1");
   const [profile, technologies, projects] = await Promise.all([
     portfolioService.getProfile(),
-    portfolioService.getTechnologies(),
+    portfolioService.getTechnologies({ hasProject: true }),
     portfolioService.getProjects({ query, technology, sort, page }),
   ]);
 

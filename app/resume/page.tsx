@@ -32,11 +32,17 @@ export default async function ResumePage() {
             <Box title="Profile">
               <p className="leading-7 text-black/62">{profile?.fullBio ?? profile?.shortBio ?? "Profile belum diisi."}</p>
             </Box>
-            <Box title="Skills">
+            <Box title="Hard Skills">
               <div className="flex flex-wrap gap-2">
-                {skills.map((skill) => <span key={skill.id} className="rounded-md bg-black/[0.06] px-3 py-2 text-sm font-semibold">{skill.technology.name}</span>)}
+                {skills.filter(s => s.type === "HARD").map((skill) => <span key={skill.id} className="rounded-md bg-black/[0.06] px-3 py-2 text-sm font-semibold">{skill.technology?.name}</span>)}
               </div>
-              {skills.length === 0 ? <EmptyState title="Belum ada skill" description="Data Skill belum tersedia." /> : null}
+              {skills.filter(s => s.type === "HARD").length === 0 ? <EmptyState title="Belum ada Hard Skill" description="Data Hard Skill belum tersedia." /> : null}
+            </Box>
+            <Box title="Soft Skills">
+              <div className="flex flex-wrap gap-2">
+                {skills.filter(s => s.type === "SOFT").map((skill) => <span key={skill.id} className="rounded-md border border-black/10 px-3 py-2 text-sm font-medium">{skill.name}</span>)}
+              </div>
+              {skills.filter(s => s.type === "SOFT").length === 0 ? <EmptyState title="Belum ada Soft Skill" description="Data Soft Skill belum tersedia." /> : null}
             </Box>
             <Box title="Certificates">
               {certificates.slice(0, 5).map((item) => <p key={item.id} className="border-b border-black/10 py-2 text-sm font-semibold last:border-b-0">{item.name}</p>)}

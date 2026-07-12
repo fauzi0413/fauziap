@@ -108,17 +108,19 @@ export default async function PreviewResumePage() {
         <h2 className="mb-2 border-b-2 border-black pb-1 text-lg font-bold uppercase tracking-wider text-black">
           Skills
         </h2>
-        {/* Group skills by category for better readability */}
         <div className="text-sm text-black">
-          {Array.from(new Set(skills.map(s => s.category || "Technical Skills"))).map(cat => {
-            const catSkills = skills.filter(s => (s.category || "Technical Skills") === cat);
-            return (
-              <div key={cat} className="mb-1">
-                <span className="font-bold">{cat}: </span>
-                <span>{catSkills.map((s) => s.technology?.name).join(", ")}</span>
-              </div>
-            );
-          })}
+          {skills.some(s => s.type === "HARD") && (
+            <div className="mb-1">
+              <span className="font-bold">Hard Skills: </span>
+              <span>{skills.filter(s => s.type === "HARD").map((s) => s.technology?.name).filter(Boolean).join(", ")}</span>
+            </div>
+          )}
+          {skills.some(s => s.type === "SOFT") && (
+            <div className="mb-1">
+              <span className="font-bold">Soft Skills: </span>
+              <span>{skills.filter(s => s.type === "SOFT").map((s) => s.name).filter(Boolean).join(", ")}</span>
+            </div>
+          )}
         </div>
       </section>
     ),

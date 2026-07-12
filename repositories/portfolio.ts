@@ -61,21 +61,42 @@ export class PortfolioRepository {
     });
   }
 
-  getTechnologies() {
+  getTechnologies(opts?: { hasProject?: boolean }) {
+    const where = opts?.hasProject ? {
+      projectTechnology: { some: {} }
+    } : undefined;
+
     return prisma.technology.findMany({
+      where,
       orderBy: { name: "asc" },
     });
   }
 
-  getExperiences() {
+  getExperiences(params?: { isFeatured?: boolean }) {
     return prisma.experience.findMany({
+      where: params?.isFeatured !== undefined ? { isFeatured: params.isFeatured } : undefined,
       orderBy: [{ isCurrent: "desc" }, { startDate: "desc" }],
+      include: {
+        technologies: {
+          include: { technology: true }
+        },
+        education: true
+      }
     });
   }
 
   getEducations() {
     return prisma.education.findMany({
       orderBy: { startDate: "desc" },
+      include: {
+        projects: {
+          where: { isPublished: true },
+          orderBy: { createdAt: "desc" },
+        },
+        experiences: {
+          orderBy: [{ isCurrent: "desc" }, { startDate: "desc" }],
+        },
+      },
     });
   }
 
@@ -88,7 +109,9 @@ export class PortfolioRepository {
   async getProjects(params: ProjectListParams = {}) {
     const page = Math.max(params.page ?? 1, 1);
     const pageSize = Math.min(Math.max(params.pageSize ?? 9, 1), 24);
-    const where: Prisma.ProjectWhereInput = {};
+    const where: Prisma.ProjectWhereInput = {
+      isPublished: true,
+    };
 
     if (params.query) {
       where.OR = [
@@ -111,12 +134,23 @@ export class PortfolioRepository {
     const [items, total] = await Promise.all([
       prisma.project.findMany({
         where,
-        orderBy: { createdAt: params.sort === "oldest" ? "asc" : "desc" },
+        orderBy: [
+          { isFeatured: "desc" },
+          { createdAt: params.sort === "oldest" ? "asc" : "desc" }
+        ],
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: {
-          technologies: { include: { technology: true } },
+          technologies: { 
+            include: { 
+              technology: {
+                include: { skills: { select: { displayOrder: true } } }
+              } 
+            } 
+          },
           images: { orderBy: { displayOrder: "asc" } },
+          experience: true,
+          education: true,
         },
       }),
       prisma.project.count({ where }),
@@ -133,21 +167,41 @@ export class PortfolioRepository {
 
   getFeaturedProjects() {
     return prisma.project.findMany({
-      orderBy: { createdAt: "desc" },
+      where: { isPublished: true },
+      orderBy: [
+        { isFeatured: "desc" },
+        { createdAt: "desc" }
+      ],
       take: 3,
       include: {
-        technologies: { include: { technology: true } },
+        technologies: { 
+          include: { 
+            technology: {
+              include: { skills: { select: { displayOrder: true } } }
+            } 
+          } 
+        },
         images: { orderBy: { displayOrder: "asc" } },
+        experience: true,
+        education: true,
       },
     });
   }
 
   getProjectBySlug(slug: string) {
     return prisma.project.findUnique({
-      where: { slug },
+      where: { slug, isPublished: true },
       include: {
-        technologies: { include: { technology: true } },
+        technologies: { 
+          include: { 
+            technology: {
+              include: { skills: { select: { displayOrder: true } } }
+            } 
+          } 
+        },
         images: { orderBy: { displayOrder: "asc" } },
+        experience: true,
+        education: true,
       },
     });
   }
@@ -158,6 +212,7 @@ export class PortfolioRepository {
     return prisma.project.findMany({
       where: {
         id: { not: projectId },
+        isPublished: true,
         technologies: {
           some: {
             technologyId: { in: technologyIds },
@@ -167,8 +222,16 @@ export class PortfolioRepository {
       orderBy: { createdAt: "desc" },
       take: 3,
       include: {
-        technologies: { include: { technology: true } },
+        technologies: { 
+          include: { 
+            technology: {
+              include: { skills: { select: { displayOrder: true } } }
+            } 
+          } 
+        },
         images: { orderBy: { displayOrder: "asc" } },
+        experience: true,
+        education: true,
       },
     });
   }

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { portfolioService } from "@/services/portfolio";
 import { convertGoogleDriveUrl } from "@/utils/media";
-import { ArrowDownToLine, ArrowRight, ArrowUpRight, MapPin, Radio } from "lucide-react";
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, MapPin, Radio, GraduationCap } from "lucide-react";
 import { siteSettingService } from "@/services/site-setting";
 import { CvModal } from "@/components/public/CvModal";
+import { ContactModal } from "@/components/public/ContactModal";
 import { EmptyState } from "@/components/public/EmptyState";
 import { MotionReveal } from "@/components/public/MotionReveal";
 import { ProjectCard } from "@/components/public/ProjectCard";
@@ -12,21 +13,45 @@ import { PublicShell } from "@/components/public/PublicShell";
 export const dynamic = "force-dynamic";
 
 export async function PortfolioPage() {
-  const [profile, skills, projects, settings] = await Promise.all([
+  const [profile, skills, projects, settings, educations] = await Promise.all([
     portfolioService.getProfile(),
     portfolioService.getSkills(),
     portfolioService.getFeaturedProjects(),
     siteSettingService.getSetting(),
+    portfolioService.getEducations(),
   ]);
+
+  const latestEducation = educations && educations.length > 0 ? educations[0] : null;
 
   return (
     <PublicShell profile={profile} settings={settings}>
       <main>
         <section className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-[1.08fr_0.92fr] md:items-center md:py-24">
           <MotionReveal>
-            <div className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium text-black/60 shadow-sm">
-              <Radio className="h-4 w-4 text-emerald-600" />
-              {profile?.title ?? "Profile belum diisi"}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium text-black/60 shadow-sm">
+                <Radio className="h-4 w-4 text-emerald-600" />
+                {profile?.title ?? "Profile belum diisi"}
+              </div>
+              {latestEducation && (
+                <div className="inline-flex items-center gap-2.5 rounded-md border border-black/10 bg-white px-3 py-2 text-sm font-medium text-black/60 shadow-sm">
+                  {latestEducation.institutionLogo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={latestEducation.institutionLogo} alt={latestEducation.institution} className="h-4 w-4 object-contain" />
+                  ) : (
+                    <GraduationCap className="h-4 w-4 text-black/40" />
+                  )}
+                  <span>
+                    <span className="font-semibold text-black/80">{latestEducation.institution}</span>
+                    {[latestEducation.degree, latestEducation.major].filter(Boolean).length > 0 && (
+                        <span className="font-normal text-black/55">
+                          {" · "}
+                          {[latestEducation.degree, latestEducation.major].filter(Boolean).join(" ")}
+                        </span>
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
             <h1 className="mt-6 max-w-4xl text-5xl font-semibold leading-[0.98] tracking-tight md:text-7xl">
               {profile?.fullName ?? "Lengkapi profil untuk menampilkan nama Anda"}
@@ -50,15 +75,14 @@ export async function PortfolioPage() {
                 Lihat Project
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              {profile?.email && (
-                <a
-                  href={`mailto:${profile.email}`}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-5 text-sm font-semibold transition hover:border-black/30"
+              <ContactModal profile={profile}>
+                <button
+                  className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-md border border-black/10 bg-white px-5 text-sm font-semibold transition hover:border-black/30"
                 >
-                  Hubungi Saya
+                  Mari Berkoneksi
                   <ArrowUpRight className="h-4 w-4" />
-                </a>
-              )}
+                </button>
+              </ContactModal>
             </div>
           </MotionReveal>
 
@@ -81,22 +105,23 @@ export async function PortfolioPage() {
         <section className="border-y border-black/10 bg-white/65">
           <div className="mx-auto max-w-7xl px-5 py-10">
             <div className="flex flex-wrap gap-3">
-              {skills.length > 0 ? (
-                skills.map((skill) => (
+              {skills.filter(s => s.type === "HARD" && s.technology).length > 0 ? (
+                skills.filter(s => s.type === "HARD" && s.technology).map((skill) => {
+                  const tech = skill.technology!;
+                  return (
                   <span
                     key={skill.id}
                     className="flex items-center rounded-md border border-black/10 bg-white px-4 py-3 text-sm font-semibold shadow-sm"
                   >
-                    {skill.technology.icon && skill.technology.icon.startsWith("http") ? (
+                    {tech.icon && tech.icon.startsWith("http") ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={skill.technology.icon} alt={skill.technology.name} className="mr-2 h-5 w-5 object-contain" />
+                      <img src={tech.icon} alt={tech.name} className="mr-2 h-5 w-5 object-contain" />
                     ) : (
-                      skill.technology.icon ? <span className="mr-2">{skill.technology.icon}</span> : null
+                      tech.icon ? <span className="mr-2">{tech.icon}</span> : null
                     )}
-                    {skill.technology.name}
-                    {skill.level ? <span className="ml-2 text-black/45">{skill.level}</span> : null}
+                    {tech.name}
                   </span>
-                ))
+                )})
               ) : (
                 <div className="w-full">
                   <EmptyState

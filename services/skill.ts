@@ -1,7 +1,9 @@
 import { skillRepository } from "@/repositories/skill";
 
 export interface SkillPayload {
-  technologyId: string;
+  type: string;
+  name?: string | null;
+  technologyId?: string | null;
   level?: string | null;
   category?: string | null;
   isPublic?: boolean;
@@ -19,7 +21,9 @@ export class SkillService {
 
   create(data: SkillPayload) {
     return skillRepository.create({
-      technology: { connect: { id: data.technologyId } },
+      type: data.type,
+      name: data.name ?? null,
+      ...(data.type === "HARD" && data.technologyId ? { technology: { connect: { id: data.technologyId } } } : {}),
       level: data.level ?? null,
       category: data.category ?? null,
       isPublic: data.isPublic ?? true,
@@ -29,7 +33,10 @@ export class SkillService {
 
   update(id: string, data: Partial<SkillPayload>) {
     return skillRepository.update(id, {
-      ...(data.technologyId && { technology: { connect: { id: data.technologyId } } }),
+      ...(data.type !== undefined && { type: data.type }),
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.technologyId && data.type !== "SOFT" ? { technology: { connect: { id: data.technologyId } } } : {}),
+      ...(data.type === "SOFT" ? { technology: { disconnect: true } } : {}),
       ...(data.level !== undefined && { level: data.level }),
       ...(data.category !== undefined && { category: data.category }),
       ...(data.isPublic !== undefined && { isPublic: data.isPublic }),

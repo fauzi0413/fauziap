@@ -8,6 +8,7 @@ export interface EducationPayload {
   startDate: string; // ISO date string "YYYY-MM-DD"
   endDate?: string | null;
   gpa?: string | null;
+  predicate?: string | null;
   description?: string | null;
 }
 
@@ -29,6 +30,7 @@ export class EducationService {
       startDate: new Date(data.startDate),
       endDate: data.endDate ? new Date(data.endDate) : null,
       gpa: data.gpa ?? null,
+      predicate: data.predicate ?? null,
       description: data.description ?? null,
     });
   }
@@ -42,6 +44,7 @@ export class EducationService {
       ...(data.startDate !== undefined && { startDate: new Date(data.startDate) }),
       ...(data.endDate !== undefined && { endDate: data.endDate ? new Date(data.endDate) : null }),
       ...(data.gpa !== undefined && { gpa: data.gpa }),
+      ...(data.predicate !== undefined && { predicate: data.predicate }),
       ...(data.description !== undefined && { description: data.description }),
     });
   }

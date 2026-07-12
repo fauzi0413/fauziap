@@ -148,13 +148,9 @@ export default function ProjectTable({ initialData }: { initialData: ProjectWith
                     <TableCell>
                       {project.thumbnail ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={project.thumbnail}
-                          alt={project.title}
-                          className="h-10 w-14 rounded object-cover"
-                        />
+                        <img src={project.thumbnail} alt={project.title} referrerPolicy="no-referrer" className="h-10 w-14 rounded object-cover border border-gray-200 dark:border-gray-800" />
                       ) : (
-                        <div className="flex h-10 w-14 items-center justify-center rounded bg-gray-100 dark:bg-gray-800">
+                        <div className="flex h-10 w-14 items-center justify-center rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
                           <FileText className="h-4 w-4 text-gray-400" />
                         </div>
                       )}

@@ -61,8 +61,11 @@ model Technology {
 
 model Skill {
   id           String      @id @default(cuid())
-  technologyId String
-  technology   Technology  @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+  type         String      @default("HARD") // "HARD" | "SOFT"
+  name         String?     // Used for SOFT skills
+  
+  technologyId String?
+  technology   Technology?  @relation(fields: [technologyId], references: [id], onDelete: Cascade)
   level        String?     // e.g., "Beginner", "Intermediate", "Advanced", "Expert"
   category     String?     // e.g., "Frontend", "Backend", "DevOps"
   isPublic     Boolean     @default(true)
@@ -82,11 +85,16 @@ model Experience {
   startDate      DateTime
   endDate        DateTime?
   isCurrent      Boolean   @default(false)
+  isFeatured     Boolean   @default(false)
   description    String?   @db.Text
   responsibilities String? @db.Text
   
   technologies   ExperienceTechnology[]
+  projects       Project[]
   
+  educationId    String?
+  education      Education? @relation(fields: [educationId], references: [id], onDelete: SetNull)
+
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -112,7 +120,11 @@ model Education {
   startDate       DateTime
   endDate         DateTime?
   gpa             String?
+  predicate       String?
   description     String?   @db.Text
+  
+  projects        Project[]
+  experiences     Experience[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -150,6 +162,11 @@ model Project {
   demoUrl          String?
   isPublished      Boolean              @default(false)
   isFeatured       Boolean              @default(false)
+  
+  experienceId     String?
+  experience       Experience?          @relation(fields: [experienceId], references: [id], onDelete: SetNull)
+  educationId      String?
+  education        Education?           @relation(fields: [educationId], references: [id], onDelete: SetNull)
   
   images           ProjectImage[]
   technologies     ProjectTechnology[]

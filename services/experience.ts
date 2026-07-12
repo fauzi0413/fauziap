@@ -9,9 +9,11 @@ export interface ExperiencePayload {
   startDate: string; // ISO date string "YYYY-MM-DD"
   endDate?: string | null;
   isCurrent?: boolean;
+  isFeatured?: boolean;
   description?: string | null;
   responsibilities?: string | null;
   technologyIds?: string[];
+  educationId?: string | null;
 }
 
 export class ExperienceService {
@@ -35,8 +37,10 @@ export class ExperienceService {
       startDate: new Date(rest.startDate),
       endDate: rest.endDate ? new Date(rest.endDate) : null,
       isCurrent: rest.isCurrent ?? false,
+      isFeatured: rest.isFeatured ?? false,
       description: rest.description ?? null,
       responsibilities: rest.responsibilities ?? null,
+      education: rest.educationId ? { connect: { id: rest.educationId } } : undefined,
       technologies: {
         create: technologyIds.map((technologyId) => ({ technologyId })),
       },
@@ -55,8 +59,12 @@ export class ExperienceService {
       ...(rest.startDate !== undefined && { startDate: new Date(rest.startDate) }),
       ...(rest.endDate !== undefined && { endDate: rest.endDate ? new Date(rest.endDate) : null }),
       ...(rest.isCurrent !== undefined && { isCurrent: rest.isCurrent }),
+      ...(rest.isFeatured !== undefined && { isFeatured: rest.isFeatured }),
       ...(rest.description !== undefined && { description: rest.description }),
       ...(rest.responsibilities !== undefined && { responsibilities: rest.responsibilities }),
+      ...(rest.educationId !== undefined && {
+        education: rest.educationId ? { connect: { id: rest.educationId } } : { disconnect: true },
+      }),
     });
 
     if (technologyIds !== undefined) {

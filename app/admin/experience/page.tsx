@@ -1,14 +1,16 @@
 import { experienceService } from "@/services/experience";
 import { technologyService } from "@/services/technology";
+import { portfolioService } from "@/services/portfolio";
 import ExperienceTable from "@/components/admin/ExperienceTable";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminExperiencePage() {
-  const [experiences, technologies] = await Promise.all([
+  const [experiences, technologies, educations] = await Promise.all([
     experienceService.getAll(),
     technologyService.getAll(),
+    portfolioService.getEducations(),
   ]);
 
   return (
@@ -17,7 +19,7 @@ export default async function AdminExperiencePage() {
         title="Experience"
         description="Kelola timeline pengalaman kerja dan teknologi yang digunakan selama bekerja."
       />
-      <ExperienceTable initialData={experiences} technologies={technologies} />
+      <ExperienceTable initialData={experiences} technologies={technologies} educations={educations} />
     </div>
   );
 }

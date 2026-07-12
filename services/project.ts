@@ -25,6 +25,8 @@ export interface ProjectPayload {
   isFeatured?: boolean;
   technologyIds?: string[];
   images?: ProjectImagePayload[];
+  experienceId?: string | null;
+  educationId?: string | null;
 }
 
 export class ProjectService {
@@ -42,11 +44,13 @@ export class ProjectService {
     const existing = await projectRepository.findBySlug(slug);
     if (existing) throw new Error(`Slug "${slug}" sudah digunakan.`);
 
-    const { technologyIds = [], images = [], ...rest } = data;
+    const { technologyIds = [], images = [], experienceId, educationId, ...rest } = data;
 
     const project = await projectRepository.create({
       ...rest,
       slug,
+      experienceId: experienceId || null,
+      educationId: educationId || null,
       technologies: {
         create: technologyIds.map((technologyId) => ({ technologyId })),
       },
@@ -59,7 +63,7 @@ export class ProjectService {
   }
 
   async update(id: string, data: Partial<ProjectPayload>) {
-    const { technologyIds, images, slug: rawSlug, ...rest } = data;
+    const { technologyIds, images, slug: rawSlug, experienceId, educationId, ...rest } = data;
 
     // Slug uniqueness check if changed
     let slug = rawSlug;
@@ -68,7 +72,12 @@ export class ProjectService {
       if (existing && existing.id !== id) throw new Error(`Slug "${slug}" sudah digunakan.`);
     }
 
-    const project = await projectRepository.update(id, { ...rest, ...(slug && { slug }) });
+    const project = await projectRepository.update(id, { 
+      ...rest, 
+      ...(slug && { slug }),
+      ...(experienceId !== undefined && { experienceId: experienceId || null }),
+      ...(educationId !== undefined && { educationId: educationId || null }),
+    });
 
     if (technologyIds !== undefined) {
       await projectRepository.setTechnologies(id, technologyIds);

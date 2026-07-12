@@ -2,8 +2,16 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 
 export const projectIncludes = {
-  technologies: { include: { technology: true } },
+  technologies: { 
+    include: { 
+      technology: {
+        include: { skills: { select: { displayOrder: true } } }
+      } 
+    } 
+  },
   images: { orderBy: { displayOrder: "asc" as const } },
+  experience: true,
+  education: true,
 };
 
 export class ProjectRepository {
@@ -25,11 +33,11 @@ export class ProjectRepository {
     return prisma.project.findUnique({ where: { slug } });
   }
 
-  create(data: Prisma.ProjectCreateInput) {
+  create(data: Prisma.ProjectUncheckedCreateInput) {
     return prisma.project.create({ data, include: projectIncludes });
   }
 
-  update(id: string, data: Prisma.ProjectUpdateInput) {
+  update(id: string, data: Prisma.ProjectUncheckedUpdateInput) {
     return prisma.project.update({ where: { id }, data, include: projectIncludes });
   }
 

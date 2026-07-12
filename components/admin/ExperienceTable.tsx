@@ -8,10 +8,11 @@ import { ExperienceDialog } from "@/components/admin/ExperienceDialog";
 import { deleteExperienceAction } from "@/actions/experience";
 import { toast } from "sonner";
 import { Edit, Plus, Search, Trash2, Briefcase, CalendarDays } from "lucide-react";
-import type { Experience, ExperienceTechnology, Technology } from "@prisma/client";
+import type { Experience, ExperienceTechnology, Technology, Education } from "@prisma/client";
 
 export type ExperienceWithRelations = Experience & {
   technologies: (ExperienceTechnology & { technology: Technology })[];
+  education?: Education | null;
 };
 
 type DialogState =
@@ -29,9 +30,11 @@ function formatDateRange(start: Date, end: Date | null, isCurrent: boolean): str
 export default function ExperienceTable({
   initialData,
   technologies,
+  educations,
 }: {
   initialData: ExperienceWithRelations[];
   technologies: Technology[];
+  educations: Education[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -79,6 +82,7 @@ export default function ExperienceTable({
           mode={dialog.mode}
           open={dialog.open}
           technologies={technologies}
+          educations={educations}
           onClose={closeDialog}
           onSuccess={onSuccess}
         />

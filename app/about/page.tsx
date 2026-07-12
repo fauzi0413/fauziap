@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowUpRight, FolderGit2 } from "lucide-react";
+import Link from "next/link";
 import { portfolioService } from "@/services/portfolio";
 import { siteSettingService } from "@/services/site-setting";
 import { convertGoogleDriveUrl } from "@/utils/media";
@@ -23,7 +24,7 @@ export default async function AboutPage() {
   const [profile, skills, experiences, educations, settings] = await Promise.all([
     portfolioService.getProfile(),
     portfolioService.getSkills(),
-    portfolioService.getExperiences(),
+    portfolioService.getExperiences({ isFeatured: true }),
     portfolioService.getEducations(),
     siteSettingService.getSetting(),
   ]);
@@ -73,19 +74,6 @@ export default async function AboutPage() {
                 {profile?.fullBio ?? "Field fullBio pada tabel Profile belum diisi."}
               </p>
             </div>
-            <Panel title="Hard Skill">
-              {skills.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill) => (
-                    <span key={skill.id} className="rounded-md bg-black/[0.06] px-3 py-2 text-sm font-semibold">
-                      {skill.technology.name}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState title="Belum ada skill" description="Tambahkan data Skill melalui dashboard admin." />
-              )}
-            </Panel>
             <Panel title="Education History">
               {educations.map((education) => (
                 <div key={education.id} className="border-b border-black/10 py-4 last:border-b-0 flex gap-4">
@@ -110,11 +98,21 @@ export default async function AboutPage() {
                         </>
                       )}
                     </div>
-                    {education.description && (
-                      <p className="mt-2 text-sm text-black/60 leading-relaxed whitespace-pre-line">
-                        {education.description}
-                      </p>
-                    )}
+                    {education.projects && education.projects.length > 0 ? (
+                      <div className="mt-4">
+                        <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-black/40">Latest Project</p>
+                        <Link href={`/projects/${education.projects[0].slug}`} className="inline-flex max-w-full items-center gap-2 rounded-md border border-black/10 bg-black/5 px-3 py-2 transition hover:bg-black/10 group">
+                          <FolderGit2 className="h-4 w-4 shrink-0 text-black/40" />
+                          <span className="truncate text-sm font-semibold text-black/80 group-hover:text-black">
+                            {education.projects[0].title}
+                          </span>
+                        </Link>
+                      </div>
+                    ) : null}
+                    
+                    <Link href={`/education#${education.id}`} className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-black/60 transition hover:text-black">
+                      Lihat lebih lengkap <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -122,22 +120,84 @@ export default async function AboutPage() {
                 <EmptyState title="Belum ada education" description="Data Education akan tampil otomatis." />
               ) : null}
             </Panel>
+            <Panel title="Hard Skill">
+              {skills.filter(s => s.type === "HARD").length > 0 ? (
+                <div>
+                  <div className="flex flex-wrap gap-2">
+                    {skills.filter(s => s.type === "HARD").map((skill) => {
+                      const levelBorder = skill.level === "Expert" ? "border-purple-500" 
+                                        : skill.level === "Advanced" ? "border-orange-500"
+                                        : skill.level === "Intermediate" ? "border-yellow-500"
+                                        : skill.level === "Elementary" ? "border-blue-500"
+                                        : skill.level === "Beginner" ? "border-gray-500"
+                                        : "border-transparent";
+                      return (
+                        <span key={skill.id} className={`inline-flex items-center gap-2 rounded-md bg-black/[0.06] px-3 py-2 text-sm font-semibold border-l-4 ${levelBorder}`}>
+                          {skill.technology?.icon && skill.technology.icon.startsWith("http") ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={skill.technology.icon} alt={skill.technology?.name ?? ""} className="h-5 w-5 object-contain" />
+                          ) : (
+                            skill.technology?.icon ? <span>{skill.technology?.icon}</span> : null
+                          )}
+                          <span>{skill.technology?.name}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 text-xs font-medium text-black/50">
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-gray-500"></span> Beginner</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-blue-500"></span> Elementary</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-yellow-500"></span> Intermediate</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-orange-500"></span> Advanced</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-purple-500"></span> Expert</span>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState title="Belum ada Hard Skill" description="Tambahkan data Hard Skill melalui dashboard admin." />
+              )}
+            </Panel>
+            <Panel title="Soft Skill">
+              {skills.filter(s => s.type === "SOFT").length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {skills.filter(s => s.type === "SOFT").map((skill) => (
+                    <span key={skill.id} className="rounded-md border border-black/10 px-3 py-2 text-sm font-medium">
+                      {skill.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState title="Belum ada Soft Skill" description="Tambahkan data Soft Skill melalui dashboard admin." />
+              )}
+            </Panel>
           </div>
         </section>
         <section className="mx-auto max-w-7xl px-5 pb-16">
-          <Panel title="Experience Preview">
-            {experiences.slice(0, 2).map((experience) => (
-              <div key={experience.id} className="border-b border-black/10 py-3 last:border-b-0">
-                <p className="font-semibold">{experience.title}</p>
-                <p className="text-sm text-black/55">{experience.company}</p>
-                <p className="mt-1 text-xs text-black/45">
-                  {formatPeriod(experience.startDate, experience.endDate, experience.isCurrent)}
-                </p>
+          <Panel title="Featured Experience">
+            {experiences.map((experience) => (
+              <div key={experience.id} className="border-b border-black/10 py-3 last:border-b-0 flex items-start gap-3">
+                {experience.companyLogo && experience.companyLogo.startsWith("http") ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={experience.companyLogo} alt={experience.company} className="mt-0.5 h-5 w-5 shrink-0 object-contain" />
+                ) : (
+                  experience.companyLogo ? <span className="mt-0.5 shrink-0">{experience.companyLogo}</span> : null
+                )}
+                <div>
+                  <p className="font-semibold">{experience.title} <span className="font-normal">di {experience.company}</span></p>
+                  <p className="mt-1 text-xs text-black/45">
+                    {formatPeriod(experience.startDate, experience.endDate, experience.isCurrent)}
+                  </p>
+                </div>
               </div>
             ))}
             {experiences.length === 0 ? (
               <EmptyState title="Belum ada experience" description="Data Experience akan tampil otomatis." />
-            ) : null}
+            ) : (
+              <div className="mt-4 pt-3 border-t border-black/5">
+                <Link href="/experience" className="inline-flex items-center text-sm font-semibold text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                  Lihat lainnya <span className="ml-1 opacity-70">→</span>
+                </Link>
+              </div>
+            )}
           </Panel>
         </section>
       </main>

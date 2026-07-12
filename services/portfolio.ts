@@ -15,12 +15,12 @@ export class PortfolioService {
     return portfolioRepository.getSkills();
   }
 
-  getTechnologies() {
-    return portfolioRepository.getTechnologies();
+  getTechnologies(opts?: { hasProject?: boolean }) {
+    return portfolioRepository.getTechnologies(opts);
   }
 
-  getExperiences() {
-    return portfolioRepository.getExperiences();
+  getExperiences(params?: { isFeatured?: boolean }) {
+    return portfolioRepository.getExperiences(params);
   }
 
   getEducations() {
