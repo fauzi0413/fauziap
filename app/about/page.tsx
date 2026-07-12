@@ -94,7 +94,13 @@ export default async function AboutPage() {
                       {education.gpa && (
                         <>
                           <span className="h-1 w-1 rounded-full bg-black/20" />
-                          <span>GPA: {education.gpa}</span>
+                          <span className="text-black font-bold">GPA: {education.gpa}</span>
+                        </>
+                      )}
+                      {education.predicate && (
+                        <>
+                          <span className="h-1 w-1 rounded-full bg-black/20" />
+                          <span className="text-black font-bold">{education.predicate}</span>
                         </>
                       )}
                     </div>
@@ -174,20 +180,24 @@ export default async function AboutPage() {
         <section className="mx-auto max-w-7xl px-5 pb-16">
           <Panel title="Featured Experience">
             {experiences.map((experience) => (
-              <div key={experience.id} className="border-b border-black/10 py-3 last:border-b-0 flex items-start gap-3">
+              <Link
+                key={experience.id}
+                href={`/experience#${experience.id}`}
+                className="group border-b border-black/10 py-3 last:border-b-0 flex items-start gap-3 transition hover:bg-black/[0.02] -mx-5 px-5"
+              >
                 {experience.companyLogo && experience.companyLogo.startsWith("http") ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={experience.companyLogo} alt={experience.company} className="mt-0.5 h-5 w-5 shrink-0 object-contain" />
+                  <img src={experience.companyLogo} alt={experience.company} className="mt-0.5 h-5 w-5 shrink-0 object-contain transition group-hover:scale-105" />
                 ) : (
-                  experience.companyLogo ? <span className="mt-0.5 shrink-0">{experience.companyLogo}</span> : null
+                  experience.companyLogo ? <span className="mt-0.5 shrink-0 transition group-hover:scale-105">{experience.companyLogo}</span> : null
                 )}
                 <div>
-                  <p className="font-semibold">{experience.title} <span className="font-normal">di {experience.company}</span></p>
+                  <p className="font-semibold group-hover:text-blue-600 transition-colors">{experience.title} <span className="font-normal text-black group-hover:text-black">di {experience.company}</span></p>
                   <p className="mt-1 text-xs text-black/45">
                     {formatPeriod(experience.startDate, experience.endDate, experience.isCurrent)}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))}
             {experiences.length === 0 ? (
               <EmptyState title="Belum ada experience" description="Data Experience akan tampil otomatis." />

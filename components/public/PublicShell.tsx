@@ -3,6 +3,8 @@ import type { Profile, SiteSetting } from "@prisma/client";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { CvModal } from "@/components/public/CvModal";
+import { portfolioService } from "@/services/portfolio";
+import { siteSettingService } from "@/services/site-setting";
 
 const navItems = [
   { label: "Overview", href: "/" },
@@ -12,15 +14,17 @@ const navItems = [
   { label: "Projects", href: "/projects" },
 ];
 
-export function PublicShell({
-  profile,
-  settings,
+export async function PublicShell({
+  profile: initialProfile,
+  settings: initialSettings,
   children,
 }: {
-  profile: Profile | null;
+  profile?: Profile | null;
   settings?: SiteSetting | null;
   children: React.ReactNode;
 }) {
+  const profile = initialProfile !== undefined ? initialProfile : await portfolioService.getProfile();
+  const settings = initialSettings !== undefined ? initialSettings : await siteSettingService.getSetting();
   const name = settings?.siteName || profile?.fullName || "Portfolio";
 
   return (

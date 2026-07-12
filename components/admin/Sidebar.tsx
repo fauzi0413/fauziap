@@ -30,6 +30,7 @@ const navigation = [
   { name: "Project", href: "/admin/projects", icon: FolderDot },
   { name: "Experience", href: "/admin/experience", icon: Briefcase },
   { name: "Education", href: "/admin/education", icon: GraduationCap },
+  { name: "Research", href: "/admin/research", icon: Microscope },
   { name: "Certificate", href: "/admin/certificates", icon: FileBadge },
   { name: "Visitor Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Resume Setting", href: "/admin/resume", icon: ScrollText },

@@ -1,11 +1,19 @@
-import { ModulePlaceholder } from "@/components/admin/ModulePlaceholder";
+import { researchService } from "@/services/research";
+import ResearchTable from "@/components/admin/ResearchTable";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
-export default function AdminResearchPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminResearchPage() {
+  const dataset = await researchService.getAll();
+
   return (
-    <ModulePlaceholder
-      title="Research"
-      description="Kelola penelitian, dataset, metode, metrik evaluasi, repository, publikasi, dan paper."
-      fields={["Title", "Abstract", "Dataset", "Method", "Model", "Result", "Evaluation Metric", "Publication", "Repository URL", "Paper File"]}
-    />
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Riset & Publikasi"
+        description="Kelola daftar paper penelitian, jurnal akademik, ataupun tautan dataset Anda."
+      />
+      <ResearchTable initialData={dataset} />
+    </div>
   );
 }

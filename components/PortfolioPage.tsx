@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { portfolioService } from "@/services/portfolio";
+import { researchService } from "@/services/research";
 import { convertGoogleDriveUrl } from "@/utils/media";
-import { ArrowDownToLine, ArrowRight, ArrowUpRight, MapPin, Radio, GraduationCap } from "lucide-react";
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, MapPin, Radio, GraduationCap, Award, Microscope, Blocks, FileText } from "lucide-react";
 import { siteSettingService } from "@/services/site-setting";
 import { CvModal } from "@/components/public/CvModal";
 import { ContactModal } from "@/components/public/ContactModal";
@@ -13,12 +14,14 @@ import { PublicShell } from "@/components/public/PublicShell";
 export const dynamic = "force-dynamic";
 
 export async function PortfolioPage() {
-  const [profile, skills, projects, settings, educations] = await Promise.all([
+  const [profile, skills, projects, certificates, settings, educations, researches] = await Promise.all([
     portfolioService.getProfile(),
     portfolioService.getSkills(),
     portfolioService.getFeaturedProjects(),
+    portfolioService.getCertificates(),
     siteSettingService.getSetting(),
     portfolioService.getEducations(),
+    researchService.getAll({ isPublic: true }),
   ]);
 
   const latestEducation = educations && educations.length > 0 ? educations[0] : null;
@@ -62,7 +65,7 @@ export async function PortfolioPage() {
             {profile?.location ? (
               <div className="mt-5 flex flex-wrap items-center gap-3 text-sm font-medium text-black/55">
                 <span className="inline-flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className="h-4 w-4 text-emerald-600" />
                   {profile.location}
                 </span>
               </div>
@@ -178,6 +181,155 @@ export async function PortfolioPage() {
             </div>
           </div>
         </section>
+
+        {/* Certificates Section */}
+        <section className="bg-[#f7f7f4]">
+          <div className="mx-auto max-w-7xl px-5 py-16 md:py-24">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-black/45">Sertifikasi</p>
+                <h6 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl text-black">
+                  Validasi keahlian teknis dan pembelajaran berkelanjutan.
+                </h6>
+              </div>
+              <Link href="/certificates" className="inline-flex items-center gap-2 text-sm font-semibold text-black transition hover:text-black/70">
+                Semua Sertifikat
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+            
+            <div className="mt-10 flex flex-col gap-6">
+              {certificates.length > 0 ? (
+                certificates.slice(0, 4).map((cert) => (
+                  <article key={cert.id} className="flex gap-4 border-b border-black/10 pb-6 rounded transition hover:bg-black/[0.02] p-4 last:border-0">
+                    <div className="shrink-0 mt-1">
+                      {cert.issuerLogo ? (
+                        <div className="h-12 w-12 overflow-hidden bg-white">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={cert.issuerLogo} alt={cert.issuer} className="h-full w-full object-contain border border-black/10 rounded-sm bg-black/5" />
+                        </div>
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-black/5 border border-black/10">
+                          <Award className="h-6 w-6 text-black/40" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <h3 className="text-[17px] font-semibold text-gray-900 leading-snug">
+                        {cert.name}
+                      </h3>
+                      <p className="mt-0.5 text-[15px] text-gray-900">{cert.issuer}</p>
+                      <p className="max-w-md mt-0.5 text-[14px] text-black/60 font-medium">
+                        Dikeluarkan {cert.issueDate.toLocaleDateString("id-ID", { month: "short", year: "numeric" })}
+                        {cert.expiryDate ? ` · Berakhir ${cert.expiryDate.toLocaleDateString("id-ID", { month: "short", year: "numeric" })}` : ""}
+                      </p>
+                      
+                      {cert.credentialId && (
+                        <p className="mt-0.5 text-[14px] text-black/60 font-medium">ID Kredensial {cert.credentialId}</p>
+                      )}
+                      
+                      {cert.credentialUrl && (
+                        <a 
+                          href={cert.credentialUrl} 
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex max-w-fit items-center gap-2 rounded-full border border-black/40 bg-transparent px-4 py-1.5 text-[14px] font-semibold text-black/75 transition hover:bg-black/5 hover:text-black hover:border-black/60"
+                        >
+                          Tampilkan kredensial
+                          <ArrowUpRight className="h-4 w-4 opacity-60" />
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <div className="md:col-span-3">
+                  <EmptyState
+                    title="Certificate belum tersedia"
+                    description="Tambahkan data Certificate dari dashboard admin."
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Research Section */}
+        {researches.length > 0 && (
+          <section className="bg-white">
+            <div className="mx-auto max-w-7xl px-5 py-16 md:py-24">
+              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-black/45">Riset & Publikasi</p>
+                  <h6 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl text-black">
+                    Eksplorasi penelitian dan dataset yang telah dipublikasikan.
+                  </h6>
+                </div>
+                <Link href="/research" className="inline-flex items-center gap-2 text-sm font-semibold text-black transition hover:text-black/70">
+                  Semua Publikasi
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </div>
+              
+              <div className="mt-10 flex flex-col gap-6">
+                {researches.slice(0, 3).map((item) => (
+                  <article key={item.id} className="flex gap-4 border-b border-black/10 pb-6 rounded transition hover:bg-black/[0.02] p-4 last:border-0">
+                    <div className="shrink-0 mt-1">
+                      {item.image ? (
+                        <div className="h-12 w-12 overflow-hidden bg-white">
+                          <img src={item.image} alt="Thumbnail" className="h-full w-full object-cover border border-black/10 rounded-sm bg-black/5" />
+                        </div>
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-blue-50 border border-blue-100 dark:bg-blue-900/20 dark:border-blue-900/30">
+                          {item.category === "DATASET" ? (
+                            <Blocks className="h-6 w-6 text-blue-500" />
+                          ) : (
+                            <FileText className="h-6 w-6 text-blue-500" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <h3 className="text-[17px] font-semibold text-gray-900 leading-snug">
+                        {item.title}
+                      </h3>
+                      {item.authors && (
+                        <p className="mt-0.5 text-[15px] text-gray-900">{item.authors}</p>
+                      )}
+                      <p className="mt-0.5 text-[14px] text-black/60 font-medium">
+                        <span className="inline-flex rounded bg-blue-50 px-1 py-0.5 text-[10px] font-bold tracking-wider text-blue-600 mr-2 uppercase">
+                          {item.category}
+                        </span>
+                        Diterbitkan oleh {item.publisher} pada {item.publishDate.toLocaleDateString("id-ID", { month: "short", year: "numeric" })}
+                      </p>
+                      
+                      {item.description && (
+                        <p className="mt-2 text-[14px] text-black/70 leading-relaxed text-justify">
+                          <span className="text-black font-bold">Abstrak - </span>
+                          {item.description}
+                        </p>
+                      )}
+                      
+                      {item.url && (
+                        <a 
+                          href={item.url} 
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-4 inline-flex max-w-fit items-center gap-2 rounded-full border border-black/40 bg-transparent px-4 py-1.5 text-[14px] font-semibold text-black/75 transition hover:bg-black/5 hover:text-black hover:border-black/60"
+                        >
+                          Lihat publikasi
+                          <ArrowUpRight className="h-4 w-4 opacity-60" />
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </PublicShell>
   );

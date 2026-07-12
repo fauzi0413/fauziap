@@ -336,8 +336,8 @@ export function ProjectForm({
       demoUrl: demoUrl.trim() || null,
       isPublished,
       isFeatured,
-      experienceId: experienceId || undefined,
-      educationId: educationId || undefined,
+      experienceId: experienceId || null,
+      educationId: educationId || null,
       technologyIds: selectedTechIds,
       images: images.map((img, idx) => ({
         imageUrl: img.url,

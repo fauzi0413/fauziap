@@ -8,6 +8,7 @@ export interface CertificatePayload {
   credentialId?: string | null;
   credentialUrl?: string | null;
   image?: string | null;
+  issuerLogo?: string | null;
   isPublic?: boolean;
 }
 
@@ -29,6 +30,7 @@ export class CertificateService {
       credentialId: data.credentialId ?? null,
       credentialUrl: data.credentialUrl ?? null,
       image: data.image ?? null,
+      issuerLogo: data.issuerLogo ?? null,
       isPublic: data.isPublic ?? true,
     });
   }
@@ -42,6 +44,7 @@ export class CertificateService {
       ...(data.credentialId !== undefined && { credentialId: data.credentialId }),
       ...(data.credentialUrl !== undefined && { credentialUrl: data.credentialUrl }),
       ...(data.image !== undefined && { image: data.image }),
+      ...(data.issuerLogo !== undefined && { issuerLogo: data.issuerLogo }),
       ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
     });
   }

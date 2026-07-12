@@ -95,7 +95,10 @@ export default async function PreviewResumePage() {
               </div>
               <div className="flex items-baseline justify-between text-black">
                 <span>{edu.degree}{edu.major ? ` in ${edu.major}` : ""}</span>
-                {edu.gpa && <span className="text-sm">GPA: {edu.gpa}</span>}
+                <div className="flex gap-2">
+                  {edu.gpa && <span className="text-sm">GPA: {edu.gpa}</span>}
+                  {edu.predicate && <span className="text-sm">({edu.predicate})</span>}
+                </div>
               </div>
             </div>
           ))}

@@ -46,7 +46,7 @@ export function RelatedProjectsGallery({
       {hasMore && (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mt-4 inline-flex items-center text-[13px] font-semibold text-emerald-600 transition hover:text-emerald-700"
+          className="mt-4 inline-flex items-center text-[13px] font-semibold text-emerald-600 transition hover:text-emerald-700 hover:cursor-pointer"
         >
           Lihat semua {projects.length} project
         </button>

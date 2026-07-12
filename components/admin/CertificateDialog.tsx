@@ -42,6 +42,10 @@ export function CertificateDialog({ mode, open, onClose, onSuccess }: Certificat
   
   const [imageRaw, setImageRaw] = useState(cert?.image ?? "");
   const [imageUrl, setImageUrl] = useState(cert?.image ? convertGoogleDriveUrl(cert.image) : "");
+  
+  const [issuerLogoRaw, setIssuerLogoRaw] = useState(cert?.issuerLogo ?? "");
+  const [issuerLogoUrl, setIssuerLogoUrl] = useState(cert?.issuerLogo ? convertGoogleDriveUrl(cert.issuerLogo) : "");
+
   const [isPublic, setIsPublic] = useState(cert?.isPublic ?? true);
 
   const [isPending, startTransition] = useTransition();
@@ -58,6 +62,8 @@ export function CertificateDialog({ mode, open, onClose, onSuccess }: Certificat
       setCredentialUrl(cert?.credentialUrl ?? "");
       setImageRaw(cert?.image ?? "");
       setImageUrl(cert?.image ? convertGoogleDriveUrl(cert.image) : "");
+      setIssuerLogoRaw(cert?.issuerLogo ?? "");
+      setIssuerLogoUrl(cert?.issuerLogo ? convertGoogleDriveUrl(cert.issuerLogo) : "");
       setIsPublic(cert?.isPublic ?? true);
       
       setTimeout(() => firstInputRef.current?.focus(), 50);
@@ -67,6 +73,11 @@ export function CertificateDialog({ mode, open, onClose, onSuccess }: Certificat
   function handleImageChange(val: string) {
     setImageRaw(val);
     setImageUrl(val ? convertGoogleDriveUrl(val) : "");
+  }
+
+  function handleIssuerLogoChange(val: string) {
+    setIssuerLogoRaw(val);
+    setIssuerLogoUrl(val ? convertGoogleDriveUrl(val) : "");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -80,6 +91,7 @@ export function CertificateDialog({ mode, open, onClose, onSuccess }: Certificat
       credentialId: credentialId.trim() || null,
       credentialUrl: credentialUrl.trim() || null,
       image: imageUrl || null,
+      issuerLogo: issuerLogoUrl || null,
       isPublic,
     };
 
@@ -231,17 +243,17 @@ export function CertificateDialog({ mode, open, onClose, onSuccess }: Certificat
             </div>
 
             {/* 4. Media & Visibility */}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="sm:col-span-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
                 <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
-                  Gambar / Scan Sertifikat (Url / G-Drive)
+                  Gambar / Scan Sertifikat
                 </label>
                 <div className="mt-2 flex items-center gap-3">
                   <input
                     type="text"
                     value={imageRaw}
                     onChange={(e) => handleImageChange(e.target.value)}
-                    placeholder="https://… atau share link Google Drive"
+                    placeholder="https://… atau share link G-Drive"
                     className={`${inputClass} mt-0 flex-1`}
                   />
                   {imageUrl && (
@@ -260,6 +272,33 @@ export function CertificateDialog({ mode, open, onClose, onSuccess }: Certificat
               </div>
 
               <div>
+                <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                  Logo Penerbit
+                </label>
+                <div className="mt-2 flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={issuerLogoRaw}
+                    onChange={(e) => handleIssuerLogoChange(e.target.value)}
+                    placeholder="https://… atau share link G-Drive"
+                    className={`${inputClass} mt-0 flex-1`}
+                  />
+                  {issuerLogoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={issuerLogoUrl}
+                      alt="preview logo"
+                      className="h-10 w-10 shrink-0 rounded border border-gray-200 object-contain dark:border-gray-700"
+                      onError={(e) => (e.currentTarget.style.opacity = "0.3")}
+                    />
+                  )}
+                </div>
+                <div className="mt-2">
+                  <ImageUpload value={issuerLogoRaw} onChange={handleIssuerLogoChange} label="Unggah Logo" />
+                </div>
+              </div>
+              
+              <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
                   Visibilitas
                 </label>

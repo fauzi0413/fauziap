@@ -122,9 +122,11 @@ model Education {
   gpa             String?
   predicate       String?
   description     String?   @db.Text
+  finalProjectId  String?
   
   projects        Project[]
   experiences     Experience[]
+  finalProject    Research? @relation("FinalProject", fields: [finalProjectId], references: [id], onDelete: SetNull)
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -139,7 +141,26 @@ model Certificate {
   credentialId   String?
   credentialUrl  String?
   image          String?
+  issuerLogo     String?
   isPublic       Boolean   @default(true)
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Research {
+  id             String    @id @default(cuid())
+  title          String
+  category       String    @default("PUBLICATION") // e.g. "PUBLICATION", "DATASET"
+  publisher      String
+  publishDate    DateTime
+  description    String?   @db.Text
+  url            String?
+  image          String?
+  authors        String?
+  isPublic       Boolean   @default(true)
+  
+  education      Education[] @relation("FinalProject")
   
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

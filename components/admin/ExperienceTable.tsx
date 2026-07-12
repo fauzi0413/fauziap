@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ExperienceDialog } from "@/components/admin/ExperienceDialog";
 import { deleteExperienceAction } from "@/actions/experience";
 import { toast } from "sonner";
-import { Edit, Plus, Search, Trash2, Briefcase, CalendarDays } from "lucide-react";
+import { Edit, Plus, Search, Trash2, Briefcase, CalendarDays, Flame } from "lucide-react";
 import type { Experience, ExperienceTechnology, Technology, Education } from "@prisma/client";
 
 export type ExperienceWithRelations = Experience & {
@@ -157,7 +157,14 @@ export default function ExperienceTable({
 
                     {/* Title + Company */}
                     <TableCell>
-                      <p className="font-semibold text-gray-900 dark:text-white">{exp.title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-gray-900 dark:text-white">{exp.title}</p>
+                        {exp.isFeatured && (
+                          <span title="Featured" className="flex items-center">
+                            <Flame className="h-4 w-4 fill-orange-500 text-orange-500" />
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{exp.company}</p>
                     </TableCell>
 

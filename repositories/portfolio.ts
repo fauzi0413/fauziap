@@ -80,7 +80,11 @@ export class PortfolioRepository {
         technologies: {
           include: { technology: true }
         },
-        education: true
+        education: true,
+        projects: {
+          where: { isPublished: true },
+          orderBy: { createdAt: "desc" },
+        }
       }
     });
   }
@@ -96,6 +100,7 @@ export class PortfolioRepository {
         experiences: {
           orderBy: [{ isCurrent: "desc" }, { startDate: "desc" }],
         },
+        finalProject: true,
       },
     });
   }

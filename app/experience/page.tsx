@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/public/EmptyState";
 import { PageHeader } from "@/components/public/PageHeader";
 import { PublicShell } from "@/components/public/PublicShell";
 import { formatPeriod } from "@/components/public/format";
+import { RelatedProjectsGallery } from "@/components/public/RelatedProjectsGallery";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +89,11 @@ export default async function ExperiencePage() {
                           </div>
                         ))}
                       </div>
+                    )}
+                    
+                    {/* @ts-ignore - dynamically added projects relation */}
+                    {item.projects && item.projects.length > 0 && (
+                      <RelatedProjectsGallery projects={item.projects as any} limit={3} />
                     )}
                   </div>
                 </article>

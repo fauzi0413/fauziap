@@ -10,6 +10,7 @@ export interface EducationPayload {
   gpa?: string | null;
   predicate?: string | null;
   description?: string | null;
+  finalProjectId?: string | null;
 }
 
 export class EducationService {
@@ -32,6 +33,7 @@ export class EducationService {
       gpa: data.gpa ?? null,
       predicate: data.predicate ?? null,
       description: data.description ?? null,
+      finalProject: data.finalProjectId ? { connect: { id: data.finalProjectId } } : undefined,
     });
   }
 
@@ -46,6 +48,9 @@ export class EducationService {
       ...(data.gpa !== undefined && { gpa: data.gpa }),
       ...(data.predicate !== undefined && { predicate: data.predicate }),
       ...(data.description !== undefined && { description: data.description }),
+      ...(data.finalProjectId !== undefined && {
+        finalProject: data.finalProjectId ? { connect: { id: data.finalProjectId } } : { disconnect: true },
+      }),
     });
   }
 

@@ -35,7 +35,7 @@ export default async function EducationPage() {
                     {item.institutionLogo && item.institutionLogo.startsWith("http") ? (
                       <div className="h-12 w-12 overflow-hidden bg-white">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={item.institutionLogo} alt={item.institution} className="h-full w-full object-contain p-1 border border-black/10 rounded-sm bg-black/5" />
+                        <img src={item.institutionLogo} alt={item.institution} className="h-full w-full object-contain border border-black/10 rounded-sm bg-black/5" />
                       </div>
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-black/5 border border-black/10">
@@ -61,6 +61,29 @@ export default async function EducationPage() {
                     {item.description && (
                       <div className="mt-4 text-[14px] leading-relaxed text-black/70 whitespace-pre-line">
                         {item.description}
+                      </div>
+                    )}
+                    
+                    {/* @ts-ignore */}
+                    {item.finalProject && (
+                      <div className="mt-5 rounded-md border border-gray-100 bg-gray-50/50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500 mb-1">
+                          Hasil Tugas Akhir
+                        </p>
+                        {/* @ts-ignore */}
+                        <p className="text-[14px] font-medium text-gray-900 leading-snug">
+                          {/* @ts-ignore */}
+                          {item.finalProject.url ? (
+                            // @ts-ignore
+                            <a href={item.finalProject.url} target="_blank" rel="noreferrer" className="hover:underline text-blue-600">
+                              {/* @ts-ignore */}
+                              {item.finalProject.title}
+                            </a>
+                          ) : (
+                            // @ts-ignore
+                            item.finalProject.title
+                          )}
+                        </p>
                       </div>
                     )}
 

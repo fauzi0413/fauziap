@@ -55,7 +55,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   {project.education && (
                     <Link href={`/education#${project.education.id}`} className="inline-flex max-w-fit items-center gap-2 rounded-full border border-black/10 bg-black/5 px-4 py-2 text-sm font-medium text-black/75 transition hover:bg-black/10">
                       <GraduationCap className="h-4 w-4 opacity-60" />
-                      Projek selama masa studi di <span className="font-semibold text-black hover:underline">{project.education.institution}</span>
+                      Projek selama masa studi di <span className="font-semibold text-black hover:underline">
+                        {[project.education.degree, project.education.major].filter(Boolean).length > 0 ? 
+                          `${[project.education.degree, project.education.major].filter(Boolean).join(" ")} · ${project.education.institution}` : 
+                          project.education.institution}
+                      </span>
                     </Link>
                   )}
                 </div>

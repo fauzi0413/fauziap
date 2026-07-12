@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button";
 import { createEducationAction, updateEducationAction } from "@/actions/education";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import type { Education } from "@prisma/client";
+import type { Education, Research } from "@prisma/client";
 
-type Mode = { type: "create" } | { type: "edit"; education: Education };
+type Mode = { type: "create" } | { type: "edit"; education: Education & { finalProject?: Research | null } };
 
 interface EducationDialogProps {
   mode: Mode;
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  researches: Research[];
 }
 
 /** Format Date → "YYYY-MM-DD" untuk input[type=month] / input[type=date] */
@@ -26,7 +27,7 @@ function toDateInput(date: Date | null | undefined): string {
 const inputClass =
   "mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600 dark:focus:border-gray-500 dark:focus:bg-gray-800";
 
-export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDialogProps) {
+export function EducationDialog({ mode, open, onClose, onSuccess, researches }: EducationDialogProps) {
   const isEdit = mode.type === "edit";
   const edu = isEdit ? mode.education : null;
 
@@ -39,6 +40,7 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
   const [gpa, setGpa] = useState(edu?.gpa ?? "");
   const [predicate, setPredicate] = useState(edu?.predicate ?? "");
   const [description, setDescription] = useState(edu?.description ?? "");
+  const [finalProjectId, setFinalProjectId] = useState(mode.type === "edit" ? mode.education.finalProjectId ?? "" : "");
   const [isPending, startTransition] = useTransition();
   const firstInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,6 +55,7 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
       setGpa(edu?.gpa ?? "");
       setPredicate(edu?.predicate ?? "");
       setDescription(edu?.description ?? "");
+      setFinalProjectId(mode.type === "edit" ? mode.education.finalProjectId ?? "" : "");
       setTimeout(() => firstInputRef.current?.focus(), 50);
     }
   }, [open, mode]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -70,6 +73,7 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
       gpa: gpa.trim() || null,
       predicate: predicate.trim() || null,
       description: description.trim() || null,
+      finalProjectId: finalProjectId || null,
     };
 
     startTransition(async () => {
@@ -241,6 +245,25 @@ export function EducationDialog({ mode, open, onClose, onSuccess }: EducationDia
                   className={inputClass}
                 />
               </div>
+            </div>
+
+            {/* Final Project */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
+                Tugas Akhir (Pilih Riset)
+              </label>
+              <select
+                value={finalProjectId}
+                onChange={(e) => setFinalProjectId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">-- Tidak ada --</option>
+                {researches.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.title}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Description */}
