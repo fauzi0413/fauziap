@@ -2,6 +2,8 @@ import { Sidebar } from "@/components/admin/Sidebar";
 import { Navbar } from "@/components/admin/Navbar";
 import { SessionProvider } from "@/providers/SessionProvider";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminLayout({
   children,
 }: {
