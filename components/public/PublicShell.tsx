@@ -5,6 +5,7 @@ import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { portfolioService } from "@/services/portfolio";
 import { siteSettingService } from "@/services/site-setting";
 import { VisitorTracker } from "@/components/public/VisitorTracker";
+import { MobileNav } from "./MobileNav";
 
 const navItems = [
   { label: "Overview", href: "/" },
@@ -54,14 +55,17 @@ export async function PublicShell({
               </Link>
             ))}
           </div>
-          <Link
-            href="/preview-resume"
-            target="_blank"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-black px-4 text-sm font-semibold text-white transition hover:bg-black/80"
-          >
-            View CV
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/preview-resume"
+              target="_blank"
+              className="inline-flex h-9 md:h-10 items-center justify-center gap-2 rounded-md bg-black px-3 md:px-4 text-xs md:text-sm font-semibold text-white transition hover:bg-black/80"
+            >
+              View CV
+              <ArrowUpRight className="h-3 w-3 md:h-4 md:w-4" />
+            </Link>
+            <MobileNav items={navItems} />
+          </div>
         </nav>
       </header>
       {children}

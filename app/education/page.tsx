@@ -43,7 +43,7 @@ export default async function EducationPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 w-full">
+                  <div className="flex-1 w-full min-w-0">
                     <h2 className="text-[17px] font-semibold text-gray-900 leading-snug">{item.institution}</h2>
                     {metaInfo ? <p className="mt-0.5 text-[15px] font-medium text-gray-900">{metaInfo}</p> : null}
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-black/55">
@@ -59,7 +59,7 @@ export default async function EducationPage() {
                     </div>
                     
                     {item.description && (
-                      <div className="mt-4 text-[14px] leading-relaxed text-black/70 whitespace-pre-line">
+                      <div className="mt-4 text-[14px] leading-relaxed text-black/70 whitespace-pre-line text-justify">
                         {item.description}
                       </div>
                     )}

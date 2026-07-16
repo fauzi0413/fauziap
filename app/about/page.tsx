@@ -37,7 +37,7 @@ export default async function AboutPage() {
           title={
             <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4">
               <span>{profile?.fullName ?? "Profil belum tersedia"}</span>
-              <span>|</span>
+              <span className="hidden md:inline">|</span>
               {profile?.title && (
                 <span className="text-2xl md:text-5xl text-emerald-600/90 font-medium tracking-normal">{profile.title}</span>
               )}
@@ -55,7 +55,7 @@ export default async function AboutPage() {
           )}
         </PageHeader>
         <section className="mx-auto grid max-w-7xl gap-8 px-5 pb-16 md:grid-cols-[0.78fr_1.22fr]">
-          <div className="overflow-hidden rounded-lg border border-black/10 bg-white p-3 shadow-sm self-start sticky top-28">
+          <div className="min-w-0 overflow-hidden rounded-lg border border-black/10 bg-white p-3 shadow-sm self-start relative md:sticky md:top-28 max-w-sm mx-auto md:max-w-none w-full">
             <div className="aspect-[4/5] overflow-hidden rounded-md bg-black/[0.04]">
               {profile?.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -67,10 +67,10 @@ export default async function AboutPage() {
               )}
             </div>
           </div>
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <div className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-semibold">Full Bio</h2>
-              <p className="mt-4 whitespace-pre-line leading-8 text-black/62">
+              <p className="mt-4 whitespace-pre-line leading-8 text-black/62 text-justify">
                 {profile?.fullBio ?? "Field fullBio pada tabel Profile belum diisi."}
               </p>
             </div>
@@ -87,7 +87,7 @@ export default async function AboutPage() {
                        <span className="text-xs font-bold text-black/40">{education.institution.charAt(0)}</span>
                     </div>
                   )}
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900">{education.institution} | {[education.degree, education.major].filter(Boolean).join(" - ")}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-black/55 font-medium">
                       <span>{formatPeriod(education.startDate, education.endDate)}</span>
@@ -129,7 +129,7 @@ export default async function AboutPage() {
             <Panel title="Hard Skill">
               {skills.filter(s => s.type === "HARD").length > 0 ? (
                 <div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap justify-center gap-2 md:justify-start">
                     {skills.filter(s => s.type === "HARD").map((skill) => {
                       const levelBorder = skill.level === "Expert" ? "border-purple-500" 
                                         : skill.level === "Advanced" ? "border-orange-500"
@@ -164,7 +164,7 @@ export default async function AboutPage() {
             </Panel>
             <Panel title="Soft Skill">
               {skills.filter(s => s.type === "SOFT").length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center gap-2 md:justify-start">
                   {skills.filter(s => s.type === "SOFT").map((skill) => (
                     <span key={skill.id} className="rounded-md border border-black/10 px-3 py-2 text-sm font-medium">
                       {skill.name}

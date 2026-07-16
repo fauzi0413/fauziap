@@ -107,7 +107,7 @@ export async function PortfolioPage() {
 
         <section className="border-y border-black/10 bg-white/65">
           <div className="mx-auto max-w-7xl px-5 py-10">
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3 md:justify-start">
               {skills.filter(s => s.type === "HARD" && s.technology).length > 0 ? (
                 skills.filter(s => s.type === "HARD" && s.technology).map((skill) => {
                   const tech = skill.technology!;
@@ -143,7 +143,7 @@ export async function PortfolioPage() {
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Ringkasan profil profesional.</h2>
           </div>
           <div className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
-            <p className="leading-8 text-black/62">
+            <p className="leading-8 text-black/62 text-justify">
               {profile?.shortBio ?? "Field shortBio pada tabel Profile belum diisi."}
             </p>
             <Link href="/about" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold">

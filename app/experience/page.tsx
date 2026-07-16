@@ -58,14 +58,14 @@ export default async function ExperiencePage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h2 className="text-[17px] font-semibold text-gray-900 leading-snug">{item.title}</h2>
                     <p className="mt-0.5 text-[15px] font-medium text-gray-900">{companyMeta}</p>
                     <p className="mt-1 text-[13px] text-black/55">{periodStr}</p>
                     {item.location && <p className="text-[13px] text-black/55">{item.location}</p>}
                     
                     {(item.description || item.responsibilities) && (
-                      <div className="mt-4 text-[14px] leading-relaxed text-black/70">
+                      <div className="mt-4 text-[14px] leading-relaxed text-black/70 text-justify">
                         {item.description && <p className="whitespace-pre-line">{item.description}</p>}
                         {item.responsibilities && <p className="mt-3 whitespace-pre-line">{item.responsibilities}</p>}
                       </div>

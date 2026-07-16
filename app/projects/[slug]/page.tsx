@@ -42,23 +42,29 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-black/45">Case Study</p>
               <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl lg:text-6xl">{project.title}</h1>
-              {project.shortDescription ? <p className="mt-5 text-lg leading-8 text-black/58">{project.shortDescription}</p> : null}
+              {project.shortDescription ? <p className="mt-5 text-lg leading-8 text-black/58 text-justify">{project.shortDescription}</p> : null}
 
               {(project.experience || project.education) && (
                 <div className="mt-6 flex flex-col gap-2">
                   {project.experience && (
-                    <Link href={`/experience#${project.experience.id}`} className="inline-flex max-w-fit items-center gap-2 rounded-full border border-black/10 bg-black/5 px-4 py-2 text-sm font-medium text-black/75 transition hover:bg-black/10">
-                      <BriefcaseBusiness className="h-4 w-4 opacity-60" />
-                      Dikerjakan saat berada di <span className="font-semibold text-black hover:underline">{project.experience.company}</span>
+                    <Link href={`/experience#${project.experience.id}`} className="inline-flex max-w-fit items-start sm:items-center gap-3 sm:gap-2 rounded-xl sm:rounded-full border border-black/10 bg-black/5 px-4 py-3 sm:py-2 text-sm font-medium text-black/75 transition hover:bg-black/10">
+                      <BriefcaseBusiness className="h-4 w-4 shrink-0 mt-0.5 sm:mt-0 opacity-60" />
+                      <span className="flex flex-col sm:flex-row sm:items-center sm:gap-1">
+                        <span>Dikerjakan saat berada di</span>
+                        <span className="font-semibold text-black hover:underline">{project.experience.company}</span>
+                      </span>
                     </Link>
                   )}
                   {project.education && (
-                    <Link href={`/education#${project.education.id}`} className="inline-flex max-w-fit items-center gap-2 rounded-full border border-black/10 bg-black/5 px-4 py-2 text-sm font-medium text-black/75 transition hover:bg-black/10">
-                      <GraduationCap className="h-4 w-4 opacity-60" />
-                      Projek selama masa studi di <span className="font-semibold text-black hover:underline">
-                        {[project.education.degree, project.education.major].filter(Boolean).length > 0 ? 
-                          `${[project.education.degree, project.education.major].filter(Boolean).join(" ")} · ${project.education.institution}` : 
-                          project.education.institution}
+                    <Link href={`/education#${project.education.id}`} className="inline-flex max-w-fit items-start sm:items-center gap-3 sm:gap-2 rounded-xl sm:rounded-full border border-black/10 bg-black/5 px-4 py-3 sm:py-2 text-sm font-medium text-black/75 transition hover:bg-black/10">
+                      <GraduationCap className="h-4 w-4 shrink-0 mt-0.5 sm:mt-0 opacity-60" />
+                      <span className="flex flex-col sm:flex-row sm:items-center sm:gap-1">
+                        <span>Projek selama masa studi di</span>
+                        <span className="font-semibold text-black hover:underline">
+                          {[project.education.degree, project.education.major].filter(Boolean).length > 0 ? 
+                            `${[project.education.degree, project.education.major].filter(Boolean).join(" ")} · ${project.education.institution}` : 
+                            project.education.institution}
+                        </span>
                       </span>
                     </Link>
                   )}
@@ -201,7 +207,7 @@ function Section({ title, content }: { title: string; content?: string | null })
   return (
     <section className="rounded-lg border border-black/10 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="mt-3 whitespace-pre-line leading-8 text-black/62">{content ?? "Belum diisi."}</p>
+      <p className="mt-3 whitespace-pre-line leading-8 text-black/62 text-justify">{content ?? "Belum diisi."}</p>
     </section>
   );
 }

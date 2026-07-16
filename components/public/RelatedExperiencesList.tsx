@@ -37,7 +37,7 @@ export function RelatedExperiencesList({ experiences }: RelatedExperiencesListPr
           <Link
             href={`/experience#${exp.id}`}
             key={exp.id}
-            className="group -ml-2 flex items-start gap-3 rounded-md p-2 transition hover:bg-black/5"
+            className="group -ml-2 flex items-start gap-3 rounded-md p-2 transition hover:bg-black/5 min-w-0"
           >
             {exp.companyLogo && exp.companyLogo.startsWith("http") ? (
               // eslint-disable-next-line @next/next/no-img-element

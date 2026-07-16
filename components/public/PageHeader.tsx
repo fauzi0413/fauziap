@@ -27,7 +27,7 @@ export function PageHeader({
       <p className="text-sm font-semibold uppercase tracking-[0.22em] text-black/45">{eyebrow}</p>
       <h1 className="mt-4 text-4xl font-semibold tracking-tight md:text-6xl">{title}</h1>
       {description ? (
-        <p className="mt-5 text-lg leading-8 text-black/58">{description}</p>
+        <p className="mt-5 text-lg leading-8 text-black/58 text-justify">{description}</p>
       ) : null}
       {children}
     </section>

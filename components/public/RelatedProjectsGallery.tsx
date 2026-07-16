@@ -26,9 +26,9 @@ export function RelatedProjectsGallery({
           <Link
             key={project.id}
             href={`/projects/${project.slug}`}
-            className="group flex flex-col gap-2 rounded-lg border border-black/10 bg-black/[0.03] p-3 transition hover:bg-black/[0.06]"
+            className="group flex flex-col gap-2 rounded-lg border border-black/10 bg-black/[0.03] p-3 transition hover:bg-black/[0.06] min-w-0"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <FolderGit2 className="h-4 w-4 shrink-0 text-black/40" />
               <span className="truncate text-sm font-semibold text-black/80 group-hover:text-black">
                 {project.title}
