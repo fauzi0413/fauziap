@@ -14,7 +14,7 @@ interface DashboardProps {
     topPages: TopStat[];
     topBrowsers: TopStat[];
     topReferers: TopStat[];
-    topCountries: TopStat[];
+    topLocations: TopStat[];
   };
   recentLogs: Visitor[];
 }
@@ -109,7 +109,7 @@ export function AnalyticsDashboard({ kpi, dailyVisits, topStats, recentLogs }: D
         <StatList title="Top Pages" data={topStats.topPages} icon={<Monitor className="h-4 w-4" />} />
         <StatList title="Sumber (Referer)" data={topStats.topReferers} icon={<Link2 className="h-4 w-4" />} defaultEmpty="Direct / Lainnya" />
         <StatList title="Top Browsers" data={topStats.topBrowsers} icon={<Globe2 className="h-4 w-4" />} />
-        <StatList title="Negara" data={topStats.topCountries} icon={<MapPin className="h-4 w-4" />} defaultEmpty="Unknown" />
+        <StatList title="Lokasi" data={topStats.topLocations} icon={<MapPin className="h-4 w-4" />} defaultEmpty="Unknown" />
       </div>
 
       {/* ── 4. Log Terbaru ── */}

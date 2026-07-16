@@ -92,15 +92,56 @@ export class AnalyticsService {
       }));
   }
 
+  async getTopLocations(limit = 5) {
+    const data = await prisma.visitor.groupBy({
+      by: ['city', 'country'],
+      _count: { _all: true },
+    });
+
+    const formatted = data
+      .filter((d) => {
+        // Abaikan jika keduanya null atau string kosong, 
+        // tapi biarkan jika nilainya "Unknown" yang diinput oleh tracker baru.
+        const cty = d.city ? String(d.city).trim() : "";
+        const ctry = d.country ? String(d.country).trim() : "";
+        return cty !== "" || ctry !== "";
+      })
+      .map((d) => {
+        let name = "Unknown";
+        const cty = d.city ? String(d.city).trim() : "";
+        const ctry = d.country ? String(d.country).trim() : "";
+        
+        if (cty && ctry && cty !== "Unknown" && ctry !== "Unknown") {
+          name = `${cty}, ${ctry}`;
+        } else if (ctry && ctry !== "Unknown") {
+          name = ctry;
+        } else if (cty && cty !== "Unknown") {
+          name = cty;
+        } else if (ctry === "Unknown" || cty === "Unknown") {
+          name = "Unknown";
+        }
+        
+        return {
+          name,
+          count: d._count._all,
+        };
+      });
+
+    // Sort descending by count
+    formatted.sort((a, b) => b.count - a.count);
+
+    return formatted.slice(0, limit);
+  }
+
   async getTopStats() {
-    const [topPages, topBrowsers, topReferers, topCountries] = await Promise.all([
+    const [topPages, topBrowsers, topReferers, topLocations] = await Promise.all([
       this.getTopX("path"),
       this.getTopX("browser"),
       this.getTopX("referer"),
-      this.getTopX("country"),
+      this.getTopLocations(),
     ]);
 
-    return { topPages, topBrowsers, topReferers, topCountries };
+    return { topPages, topBrowsers, topReferers, topLocations };
   }
 
   /**

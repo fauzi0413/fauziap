@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Profile, SiteSetting } from "@prisma/client";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { CvModal } from "@/components/public/CvModal";
 import { portfolioService } from "@/services/portfolio";
 import { siteSettingService } from "@/services/site-setting";
+import { VisitorTracker } from "@/components/public/VisitorTracker";
 
 const navItems = [
   { label: "Overview", href: "/" },
@@ -27,8 +27,21 @@ export async function PublicShell({
   const settings = initialSettings !== undefined ? initialSettings : await siteSettingService.getSetting();
   const name = settings?.siteName || profile?.fullName || "Portfolio";
 
+  if (settings?.maintenanceMode) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#f7f7f4] px-5 text-center text-[#111111]">
+        <h1 className="mb-3 text-4xl font-bold tracking-tight md:text-5xl">Sedang Dalam Perbaikan</h1>
+        <p className="max-w-md text-black/60">
+          Situs ini sedang dalam masa pemeliharaan (maintenance) untuk sementara waktu. Silakan kembali lagi nanti.
+        </p>
+        <p className="text-sm text-black/55 mt-4">Anda bisa menghubungi email saya di <a href={`mailto:${profile?.email}`} target="_blank" rel="noopener noreferrer" className="font-semibold">{profile?.email}</a></p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f7f7f4] text-[#111111]">
+      <VisitorTracker />
       <header className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f7f4]/85 backdrop-blur-xl">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link href="/" className="text-sm font-semibold tracking-wide">
@@ -41,12 +54,14 @@ export async function PublicShell({
               </Link>
             ))}
           </div>
-          <CvModal>
-            <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-black px-4 text-sm font-semibold text-white transition hover:bg-black/80">
-              View CV
-              <ArrowUpRight className="h-4 w-4" />
-            </button>
-          </CvModal>
+          <Link
+            href="/preview-resume"
+            target="_blank"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-black px-4 text-sm font-semibold text-white transition hover:bg-black/80"
+          >
+            View CV
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
         </nav>
       </header>
       {children}
@@ -59,7 +74,7 @@ export async function PublicShell({
             </p>
           </div>
           <div className="flex flex-col md:items-end text-sm text-black/55">
-             <p>&copy; {new Date().getFullYear()} {settings?.copyrightName || "Developer"}</p>
+            <p>&copy; {new Date().getFullYear()} {settings?.copyrightName || "Developer"}</p>
           </div>
           <div className="flex items-center gap-3">
             {profile?.githubUrl ? (

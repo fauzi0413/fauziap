@@ -8,6 +8,7 @@ export interface ResumeSettingPayload {
   showSkills?: boolean;
   sectionOrder?: string[];
   isAtsOptimized?: boolean;
+  dataLimitMode?: string;
 }
 
 export class ResumeSettingService {
@@ -18,6 +19,21 @@ export class ResumeSettingService {
   async updateSetting(data: ResumeSettingPayload) {
     const current = await this.getSetting();
 
+    let parsed: any = { order: ["experience", "education", "skills", "projects", "certificates"], mode: "ALL" };
+    try {
+      const raw = current.sectionOrder ? JSON.parse(current.sectionOrder) : [];
+      if (Array.isArray(raw)) {
+        parsed.order = raw.length > 0 ? raw : parsed.order;
+      } else {
+        parsed = { ...parsed, ...raw };
+      }
+    } catch {}
+
+    const newOrder = data.sectionOrder !== undefined ? data.sectionOrder : parsed.order;
+    const newMode = data.dataLimitMode !== undefined ? data.dataLimitMode : parsed.mode;
+    
+    const sectionOrderStr = JSON.stringify({ order: newOrder, mode: newMode });
+
     const payload = {
       ...(data.showExperience !== undefined && { showExperience: data.showExperience }),
       ...(data.showEducation !== undefined && { showEducation: data.showEducation }),
@@ -25,7 +41,7 @@ export class ResumeSettingService {
       ...(data.showCertificates !== undefined && { showCertificates: data.showCertificates }),
       ...(data.showSkills !== undefined && { showSkills: data.showSkills }),
       ...(data.isAtsOptimized !== undefined && { isAtsOptimized: data.isAtsOptimized }),
-      ...(data.sectionOrder !== undefined && { sectionOrder: JSON.stringify(data.sectionOrder) }),
+      sectionOrder: sectionOrderStr,
     };
 
     return resumeSettingRepository.update(current.id, payload);

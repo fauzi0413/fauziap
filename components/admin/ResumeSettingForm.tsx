@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, ArrowUp, ArrowDown, LayoutList, Eye, FileText, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowUp, ArrowDown, LayoutList, Eye, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { saveResumeSettingsAction } from "@/actions/resume-setting";
 import { toast } from "sonner";
@@ -31,13 +31,29 @@ export function ResumeSettingForm({ initialData }: Props) {
   const [showSkills, setShowSkills] = useState(initialData.showSkills);
   const [isAtsOptimized, setIsAtsOptimized] = useState(initialData.isAtsOptimized);
 
-  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
+  const savedSectionOrder = (() => {
     try {
-      return initialData.sectionOrder ? JSON.parse(initialData.sectionOrder) : [];
+      const raw = initialData.sectionOrder ? JSON.parse(initialData.sectionOrder) : [];
+      if (Array.isArray(raw)) return raw.length > 0 ? raw : ["experience", "education", "skills", "projects", "certificates"];
+      return raw.order || ["experience", "education", "skills", "projects", "certificates"];
     } catch {
       return ["experience", "education", "skills", "projects", "certificates"];
     }
-  });
+  })();
+
+  const [sectionOrder, setSectionOrder] = useState<string[]>(savedSectionOrder);
+
+  const savedDataLimitMode = (() => {
+    try {
+      const raw = initialData.sectionOrder ? JSON.parse(initialData.sectionOrder) : [];
+      if (!Array.isArray(raw) && raw.mode) return raw.mode;
+      return "ALL";
+    } catch {
+      return "ALL";
+    }
+  })();
+
+  const [dataLimitMode, setDataLimitMode] = useState<string>(savedDataLimitMode);
 
   const moveUp = (index: number) => {
     if (index === 0) return;
@@ -64,6 +80,7 @@ export function ResumeSettingForm({ initialData }: Props) {
         showSkills,
         isAtsOptimized,
         sectionOrder,
+        dataLimitMode,
       };
 
       const res = await saveResumeSettingsAction(payload);
@@ -75,9 +92,33 @@ export function ResumeSettingForm({ initialData }: Props) {
     });
   }
 
+  const hasChanges = 
+    showExperience !== initialData.showExperience ||
+    showEducation !== initialData.showEducation ||
+    showProjects !== initialData.showProjects ||
+    showCertificates !== initialData.showCertificates ||
+    showSkills !== initialData.showSkills ||
+    isAtsOptimized !== initialData.isAtsOptimized ||
+    JSON.stringify(sectionOrder) !== JSON.stringify(savedSectionOrder) ||
+    dataLimitMode !== savedDataLimitMode;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 pb-12">
-      {/* ── ATS Mode Panel ── */}
+    <>
+      {hasChanges && (
+        <div className="fixed top-24 right-8 z-50 animate-bounce rounded-lg border border-yellow-200 bg-yellow-50 p-4 shadow-lg dark:border-yellow-900/50 dark:bg-yellow-900/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-500">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-500">Ada Perubahan Data</p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-600">Jangan lupa klik "Update Format CV".</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-6 pb-12">
+        {/* ── ATS Mode Panel ── */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
         <div className="border-b border-gray-100 p-5 dark:border-gray-800">
           <div className="flex items-center gap-2">
@@ -188,6 +229,77 @@ export function ResumeSettingForm({ initialData }: Props) {
           </div>
         </div>
       </div>
+      {/* ── Data Limit Setting ── */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+        <div className="border-b border-gray-100 p-5 dark:border-gray-800">
+          <div className="flex items-center gap-2">
+            <LayoutList className="h-5 w-5 text-gray-500" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">Batas Data CV (Data Limit Mode)</h3>
+          </div>
+          <p className="mt-1 text-sm text-gray-500">
+            Tentukan apakah ingin menampilkan seluruh data Anda, hanya data yang ditandai *Featured/Highlight*, atau sekadar data-data terbaru (maksimal 3) agar CV tidak terlalu panjang.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 p-5 sm:flex-row">
+          <label className={`flex flex-1 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${dataLimitMode === 'ALL' ? 'border-gray-900 bg-gray-50 dark:border-white dark:bg-gray-900' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900'}`}>
+            <input
+              type="radio"
+              name="dataLimitMode"
+              value="ALL"
+              checked={dataLimitMode === "ALL"}
+              onChange={(e) => setDataLimitMode(e.target.value)}
+              className="mt-0.5 h-4 w-4 text-gray-900 focus:ring-gray-900 dark:bg-gray-800 dark:focus:ring-white"
+            />
+            <div className="w-full flex-1">
+              <div className="flex items-center justify-between">
+                <span className="block text-sm font-medium text-gray-900 dark:text-white">Tampilkan Semua Data</span>
+                {savedDataLimitMode === "ALL" && (
+                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Aktif</span>
+                )}
+              </div>
+              <span className="block text-xs text-gray-500 mt-1">CV akan mencakup semua histori karir, project, dan sertifikat yang Anda miliki (Bisa sangat panjang).</span>
+            </div>
+          </label>
+          <label className={`flex flex-1 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${dataLimitMode === 'FEATURED' ? 'border-gray-900 bg-gray-50 dark:border-white dark:bg-gray-900' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900'}`}>
+            <input
+              type="radio"
+              name="dataLimitMode"
+              value="FEATURED"
+              checked={dataLimitMode === "FEATURED"}
+              onChange={(e) => setDataLimitMode(e.target.value)}
+              className="mt-0.5 h-4 w-4 text-gray-900 focus:ring-gray-900 dark:bg-gray-800 dark:focus:ring-white"
+            />
+            <div className="w-full flex-1">
+              <div className="flex items-center justify-between">
+                <span className="block text-sm font-medium text-gray-900 dark:text-white">Hanya Data Highlight</span>
+                {savedDataLimitMode === "FEATURED" && (
+                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Aktif</span>
+                )}
+              </div>
+              <span className="block text-xs text-gray-500 mt-1">Hanya menampilkan Portfolio dan Pengalaman yang ditandai sebagai *Featured*.</span>
+            </div>
+          </label>
+          <label className={`flex flex-1 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${dataLimitMode === 'LATEST' ? 'border-gray-900 bg-gray-50 dark:border-white dark:bg-gray-900' : 'border-gray-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900'}`}>
+            <input
+              type="radio"
+              name="dataLimitMode"
+              value="LATEST"
+              checked={dataLimitMode === "LATEST"}
+              onChange={(e) => setDataLimitMode(e.target.value)}
+              className="mt-0.5 h-4 w-4 text-gray-900 focus:ring-gray-900 dark:bg-gray-800 dark:focus:ring-white"
+            />
+            <div className="w-full flex-1">
+              <div className="flex items-center justify-between">
+                <span className="block text-sm font-medium text-gray-900 dark:text-white">Data Terbaru Saja</span>
+                {savedDataLimitMode === "LATEST" && (
+                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Aktif</span>
+                )}
+              </div>
+              <span className="block text-xs text-gray-500 mt-1">Otomatis menyaring 3 Pengalaman terbaru, 3 Project terbaru, dll. Cocok untuk CV 1-2 halaman.</span>
+            </div>
+          </label>
+        </div>
+      </div>
 
       {/* ── Submit & Actions ── */}
       <div className="flex shrink-0 items-center justify-between pt-6">
@@ -213,7 +325,7 @@ export function ResumeSettingForm({ initialData }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPreviewModal(false)} />
-          
+
           {/* Modal Container */}
           <div className="relative flex h-full max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-950">
             {/* Header */}
@@ -226,7 +338,7 @@ export function ResumeSettingForm({ initialData }: Props) {
                 Tutup
               </Button>
             </div>
-            
+
             {/* Iframe Content */}
             <div className="flex-1 bg-gray-100 p-2 dark:bg-gray-900 sm:p-4">
               <iframe
@@ -238,6 +350,7 @@ export function ResumeSettingForm({ initialData }: Props) {
           </div>
         </div>
       )}
-    </form>
+      </form>
+    </>
   );
 }

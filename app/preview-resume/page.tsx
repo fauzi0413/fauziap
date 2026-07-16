@@ -34,11 +34,47 @@ export default async function PreviewResumePage() {
   const email = user?.email || "";
 
   let order: string[] = [];
+  let mode = "ALL";
   try {
-    order = settings.sectionOrder ? JSON.parse(settings.sectionOrder) : [];
+    const parsed = settings.sectionOrder ? JSON.parse(settings.sectionOrder) : [];
+    if (Array.isArray(parsed)) {
+      order = parsed;
+    } else {
+      order = parsed.order || ["experience", "education", "skills", "projects", "certificates"];
+      mode = parsed.mode || "ALL";
+    }
   } catch {
     order = ["experience", "education", "skills", "projects", "certificates"];
   }
+
+  // Apply Data Limit Mode
+  let filteredExperiences = experiences;
+  let filteredProjects = projects;
+  let filteredEducations = educations;
+  let filteredCertificates = certificates;
+
+  if (mode === "FEATURED") {
+    filteredExperiences = experiences.filter((exp) => exp.isFeatured);
+    filteredProjects = projects.filter((proj) => proj.isFeatured);
+    // Education & Certificates don't have isFeatured in this context, leave as is or limit to latest 3
+    filteredEducations = educations.slice(0, 3);
+    filteredCertificates = certificates.slice(0, 5);
+  } else if (mode === "LATEST") {
+    filteredExperiences = experiences.slice(0, 3);
+    filteredProjects = projects.slice(0, 3);
+    filteredEducations = educations.slice(0, 2);
+    filteredCertificates = certificates.slice(0, 5);
+  }
+
+  // Map technology ID to its skill's displayOrder
+  const techOrderMap = new Map<string, number>();
+  skills.forEach(skill => {
+    if (skill.technologyId) {
+      techOrderMap.set(skill.technologyId, skill.displayOrder);
+    }
+  });
+
+  const getTechOrder = (techId: string) => techOrderMap.get(techId) ?? 999;
 
   // Format Date for ATS
   const formatDate = (date: Date | null) => {
@@ -49,13 +85,13 @@ export default async function PreviewResumePage() {
 
   // Sections config mapping
   const components: Record<string, React.ReactNode> = {
-    experience: settings.showExperience && experiences.length > 0 && (
-      <section key="experience" className="mb-6 break-inside-avoid">
+    experience: settings.showExperience && filteredExperiences.length > 0 && (
+      <section key="experience" className="mb-6">
         <h2 className="mb-2 border-b-2 border-black pb-1 text-lg font-bold uppercase tracking-wider text-black">
           Experience
         </h2>
         <div className="space-y-4">
-          {experiences.map((exp) => (
+          {filteredExperiences.map((exp) => (
             <div key={exp.id}>
               <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
                 <h3 className="font-bold text-black">{exp.title}</h3>
@@ -68,7 +104,7 @@ export default async function PreviewResumePage() {
               </div>
               {/* ATS loves standard bullets */}
               {(exp.description || exp.responsibilities) && (
-                <ul className="mt-1 ml-4 list-disc space-y-1 text-sm text-black">
+                <ul className="mt-1 ml-4 list-disc space-y-1 text-sm text-black text-justify" style={{ textJustify: "inter-word" }}>
                   {exp.description && <li className="pl-1">{exp.description}</li>}
                   {exp.responsibilities && <li className="pl-1">{exp.responsibilities}</li>}
                 </ul>
@@ -79,13 +115,13 @@ export default async function PreviewResumePage() {
       </section>
     ),
 
-    education: settings.showEducation && educations.length > 0 && (
-      <section key="education" className="mb-6 break-inside-avoid">
+    education: settings.showEducation && filteredEducations.length > 0 && (
+      <section key="education" className="mb-6">
         <h2 className="mb-2 border-b-2 border-black pb-1 text-lg font-bold uppercase tracking-wider text-black">
           Education
         </h2>
         <div className="space-y-4">
-          {educations.map((edu) => (
+          {filteredEducations.map((edu) => (
             <div key={edu.id}>
               <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
                 <h3 className="font-bold text-black">{edu.institution}</h3>
@@ -94,7 +130,7 @@ export default async function PreviewResumePage() {
                 </span>
               </div>
               <div className="flex items-baseline justify-between text-black">
-                <span>{edu.degree}{edu.major ? ` in ${edu.major}` : ""}</span>
+                <span>{edu.degree}{edu.major ? ` ${edu.major}` : ""}</span>
                 <div className="flex gap-2">
                   {edu.gpa && <span className="text-sm">GPA: {edu.gpa}</span>}
                   {edu.predicate && <span className="text-sm">({edu.predicate})</span>}
@@ -107,7 +143,7 @@ export default async function PreviewResumePage() {
     ),
 
     skills: settings.showSkills && skills.length > 0 && (
-      <section key="skills" className="mb-6 break-inside-avoid">
+      <section key="skills" className="mb-6">
         <h2 className="mb-2 border-b-2 border-black pb-1 text-lg font-bold uppercase tracking-wider text-black">
           Skills
         </h2>
@@ -128,13 +164,13 @@ export default async function PreviewResumePage() {
       </section>
     ),
 
-    projects: settings.showProjects && projects.length > 0 && (
-      <section key="projects" className="mb-6 break-inside-avoid">
+    projects: settings.showProjects && filteredProjects.length > 0 && (
+      <section key="projects" className="mb-6">
         <h2 className="mb-2 border-b-2 border-black pb-1 text-lg font-bold uppercase tracking-wider text-black">
           Projects
         </h2>
         <div className="space-y-4">
-          {projects.map((proj) => (
+          {filteredProjects.map((proj) => (
             <div key={proj.id}>
               <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between">
                 <div className="flex items-baseline gap-2">
@@ -152,13 +188,16 @@ export default async function PreviewResumePage() {
                 </div>
               </div>
               {proj.shortDescription && (
-                <ul className="mt-1 ml-4 list-disc space-y-1 text-sm text-black">
+                <ul className="mt-1 ml-4 list-disc space-y-1 text-sm text-black text-justify" style={{ textJustify: "inter-word" }}>
                   <li className="pl-1">{proj.shortDescription}</li>
                   {/* Join project technologies as a bullet point */}
                   {proj.technologies && proj.technologies.length > 0 && (
                     <li className="pl-1">
                       <strong>Tech Stack: </strong>
-                      {proj.technologies.map(t => t.technology.name).join(", ")}
+                      {[...proj.technologies]
+                        .sort((a, b) => getTechOrder(a.technology.id) - getTechOrder(b.technology.id))
+                        .map(t => t.technology.name)
+                        .join(", ")}
                     </li>
                   )}
                 </ul>
@@ -169,13 +208,13 @@ export default async function PreviewResumePage() {
       </section>
     ),
 
-    certificates: settings.showCertificates && certificates.length > 0 && (
-      <section key="certificates" className="mb-6 break-inside-avoid">
+    certificates: settings.showCertificates && filteredCertificates.length > 0 && (
+      <section key="certificates" className="mb-6">
         <h2 className="mb-2 border-b-2 border-black pb-1 text-lg font-bold uppercase tracking-wider text-black">
           Certifications
         </h2>
         <div className="space-y-2 text-sm text-black">
-          {certificates.map((cert) => (
+          {filteredCertificates.map((cert) => (
             <div key={cert.id} className="flex justify-between">
               <div>
                 <span className="font-bold">{cert.name}</span>
@@ -207,7 +246,7 @@ export default async function PreviewResumePage() {
       <div className="min-h-screen bg-gray-200 py-10 print:bg-white print:py-0 font-sans">
         {/* A4 Container */}
         <div className="mx-auto max-w-[210mm] bg-white p-[15mm] shadow-xl xl:p-[20mm] print:m-0 print:max-w-none print:shadow-none print:p-0">
-          
+
           {/* ── ATS Header ── */}
           <header className="mb-6 text-center">
             <h1 className="text-3xl font-bold uppercase tracking-widest text-black">
@@ -216,7 +255,7 @@ export default async function PreviewResumePage() {
             {profile?.title && (
               <p className="mt-1 text-black font-medium">{profile.title}</p>
             )}
-            
+
             {/* Contact Pipes */}
             <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-black">
               {contacts.map((contact, i) => (
@@ -239,7 +278,7 @@ export default async function PreviewResumePage() {
           <div className="flex flex-col gap-0">
             {order.map((key) => components[key] || null)}
           </div>
-          
+
         </div>
       </div>
     </>
