@@ -8,10 +8,12 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   disabled?: boolean;
+  onDeleted?: () => void;
 }
 
-export function ImageUpload({ value, onChange, label = "Pilih Gambar & Unggah", disabled = false }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = "Pilih Gambar & Unggah", disabled = false, onDeleted }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const inputFileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async () => {
@@ -49,7 +51,40 @@ export function ImageUpload({ value, onChange, label = "Pilih Gambar & Unggah", 
     }
   };
 
-  const isDisabled = isUploading || disabled;
+  const handleDelete = async () => {
+    if (!value.includes('vercel-storage.com')) {
+      onChange("");
+      if (onDeleted) onDeleted();
+      return;
+    }
+
+    if (!confirm("Yakin ingin menghapus gambar ini dari server?")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: value }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      onChange("");
+      if (onDeleted) onDeleted();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Gagal menghapus gambar dari server. Silakan hapus manual tautan jika diperlukan.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isDisabled = isUploading || isDeleting || disabled;
 
   return (
     <div className="flex flex-col gap-2">
@@ -84,9 +119,19 @@ export function ImageUpload({ value, onChange, label = "Pilih Gambar & Unggah", 
         </label>
         
         {value && !isUploading && (
-          <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-            <CheckCircle className="h-3.5 w-3.5" /> File berhasil diunggah
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              <CheckCircle className="h-3.5 w-3.5" /> File berhasil diunggah
+            </span>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isDeleting ? "Menghapus..." : "Hapus"}
+            </button>
+          </div>
         )}
       </div>
     </div>

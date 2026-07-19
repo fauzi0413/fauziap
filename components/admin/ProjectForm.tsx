@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Trash2, Link2, Loader2, GripVertical, Star, Eye, EyeOff, ImageOff, Save, ArrowLeft, FileText, Blocks, Briefcase, X, FolderTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Reorder } from "framer-motion";
 import { createProjectAction, updateProjectAction } from "@/actions/project";
 import { convertGoogleDriveUrl, generateSlug, isGoogleDriveLink, extractDriveFolderId, isGoogleDriveFolderLink } from "@/utils/media";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -17,6 +18,7 @@ interface ImageEntry {
   raw: string; // what user typed (original Drive link or URL)
   url: string; // converted embed URL stored to DB
   altText: string;
+  _uid?: string;
 }
 
 // ── Shared input classes ───────────────────────────────────────────────────
@@ -53,7 +55,7 @@ function GallerySection({ images, onChange }: {
   function addImage() {
     if (!newRaw.trim()) return;
     const url = convertGoogleDriveUrl(newRaw.trim());
-    onChange([...images, { raw: newRaw.trim(), url, altText: "" }]);
+    onChange([...images, { raw: newRaw.trim(), url, altText: "", _uid: Math.random().toString(36).substr(2, 9) }]);
     setNewRaw("");
   }
 
@@ -78,7 +80,8 @@ function GallerySection({ images, onChange }: {
       const newImages = data.files.map((file: any) => ({
         raw: file.name, // Display the file name
         url: `https://lh3.googleusercontent.com/d/${file.id}`,
-        altText: file.name.replace(/\.[^/.]+$/, "") // Default alt text to file name w/o extension
+        altText: file.name.replace(/\.[^/.]+$/, ""), // Default alt text to file name w/o extension
+        _uid: Math.random().toString(36).substr(2, 9)
       }));
 
       // Append new images
@@ -106,9 +109,12 @@ function GallerySection({ images, onChange }: {
   return (
     <div className="space-y-3">
       {/* Existing images */}
-      {images.map((img, idx) => (
-        <div key={idx} className="flex items-start gap-3 rounded-lg border border-gray-100 p-3 dark:border-gray-800">
-          <GripVertical className="mt-1 h-4 w-4 shrink-0 text-gray-300" />
+      <Reorder.Group axis="y" values={images} onReorder={onChange} className="space-y-3">
+        {images.map((img, idx) => (
+          <Reorder.Item key={img._uid || img.url} value={img} className="flex items-start gap-3 rounded-lg border border-gray-100 p-3 dark:border-gray-800 bg-white dark:bg-gray-950 relative">
+            <div className="mt-1 cursor-grab active:cursor-grabbing">
+              <GripVertical className="h-4 w-4 shrink-0 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
+            </div>
           {/* Preview */}
           <div className="h-14 w-20 shrink-0 overflow-hidden rounded bg-gray-100 dark:bg-gray-800">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -128,14 +134,16 @@ function GallerySection({ images, onChange }: {
               }}
             />
           </div>
-          <div className="flex-1 space-y-1">
-            <p className="truncate text-xs text-gray-400">{img.raw}</p>
+          <div className="flex-1 min-w-0 space-y-1">
+            <p className="line-clamp-2 break-all text-xs text-gray-400" title={img.raw}>
+              {img.raw}
+            </p>
             <input
               type="text"
               value={img.altText}
               onChange={(e) => updateAltText(idx, e.target.value)}
               placeholder="Alt text / caption…"
-              className="h-8 w-full rounded border border-gray-200 bg-gray-50 px-2 text-xs text-gray-700 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              className="h-8 w-full rounded border border-gray-200 bg-gray-50 px-2 text-xs text-gray-700 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-gray-500 dark:focus:bg-gray-800"
             />
           </div>
           <button
@@ -145,8 +153,9 @@ function GallerySection({ images, onChange }: {
           >
             <Trash2 className="h-4 w-4" />
           </button>
-        </div>
-      ))}
+          </Reorder.Item>
+        ))}
+      </Reorder.Group>
 
       {/* Add new */}
       <div className="flex gap-2">
@@ -157,7 +166,7 @@ function GallerySection({ images, onChange }: {
             onChange={(e) => setNewRaw(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addImage())}
             placeholder="Paste URL atau Google Drive link…"
-            className="h-10 w-full rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600"
+            className="h-10 w-full rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600 dark:focus:border-gray-500 dark:focus:bg-gray-800"
           />
           {isDrive && (
             <span className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-blue-500">
@@ -302,6 +311,7 @@ export function ProjectForm({
       raw: img.imageUrl,
       url: img.imageUrl,
       altText: img.altText ?? "",
+      _uid: Math.random().toString(36).substr(2, 9),
     })) ?? [],
   );
 

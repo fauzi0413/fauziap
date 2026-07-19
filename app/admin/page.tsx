@@ -7,6 +7,7 @@ import {
   GraduationCap,
   MousePointerClick,
   Shapes,
+  Microscope,
 } from "lucide-react";
 import { adminService } from "@/services/admin";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
     { title: "Experience", value: stats.experiences, icon: Briefcase, description: "Pengalaman kerja di timeline publik" },
     { title: "Education", value: stats.educations, icon: GraduationCap, description: "Riwayat pendidikan dan akademik" },
     { title: "Certificate", value: stats.certificates, icon: FileBadge, description: "Kredensial yang ditampilkan publik" },
+    { title: "Research", value: stats.researches, icon: Microscope, description: "Publikasi dan penelitian akademik" },
     { title: "Visitors", value: stats.visitors, icon: MousePointerClick, description: "Kunjungan yang tercatat" },
   ];
 

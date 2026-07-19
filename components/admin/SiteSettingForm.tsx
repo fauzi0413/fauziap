@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2, Globe, Search, LayoutTemplate, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { saveSiteSettingsAction } from "@/actions/site-setting";
+import { saveSiteSettingsAction, clearSiteSettingImageAction } from "@/actions/site-setting";
 import { convertGoogleDriveUrl } from "@/utils/media";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { toast } from "sonner";
@@ -59,6 +59,13 @@ export function SiteSettingForm({ initialData }: Props) {
     });
   };
 
+  const handleDeleteField = async (field: "logoUrl" | "faviconUrl" | "openGraphImage") => {
+    const res = await clearSiteSettingImageAction(field);
+    if (!res.success) {
+      toast.error("Berhasil menghapus file, tapi gagal mengupdate database.");
+    }
+  };
+
   const inputClass = "mt-2 h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700 placeholder-gray-400 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600 dark:focus:border-gray-500 dark:focus:bg-gray-800";
   const textareaClass = "mt-2 w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 placeholder-gray-400 transition focus:border-gray-400 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:placeholder-gray-600 dark:focus:border-gray-500 dark:focus:bg-gray-800";
 
@@ -82,14 +89,14 @@ export function SiteSettingForm({ initialData }: Props) {
             <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Logo URL (Header)</label>
             <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className={inputClass} placeholder="Google Drive Link atau URL Gambar" />
             <div className="mt-2">
-              <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Unggah Logo Situs" />
+              <ImageUpload value={logoUrl} onChange={setLogoUrl} label="Unggah Logo Situs" onDeleted={() => handleDeleteField("logoUrl")} />
             </div>
           </div>
           <div>
             <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Favicon (Ikon Tab)</label>
             <input type="text" value={faviconUrl} onChange={(e) => setFaviconUrl(e.target.value)} className={inputClass} placeholder="Link logo persegi kecil untuk browser" />
             <div className="mt-2">
-              <ImageUpload value={faviconUrl} onChange={setFaviconUrl} label="Unggah Favicon" />
+              <ImageUpload value={faviconUrl} onChange={setFaviconUrl} label="Unggah Favicon" onDeleted={() => handleDeleteField("faviconUrl")} />
             </div>
           </div>
         </div>
@@ -119,7 +126,7 @@ export function SiteSettingForm({ initialData }: Props) {
             <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Open Graph Image (Social Thumbnail)</label>
             <input type="text" value={openGraphImage} onChange={(e) => setOpenGraphImage(e.target.value)} className={inputClass} placeholder="URL Thumbnail Open Graph (G-Drive / External)" />
             <div className="mt-2">
-              <ImageUpload value={openGraphImage} onChange={setOpenGraphImage} label="Unggah Thumbnail" />
+              <ImageUpload value={openGraphImage} onChange={setOpenGraphImage} label="Unggah Thumbnail" onDeleted={() => handleDeleteField("openGraphImage")} />
             </div>
           </div>
           <div>

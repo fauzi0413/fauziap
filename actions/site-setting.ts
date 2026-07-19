@@ -19,3 +19,17 @@ export async function saveSiteSettingsAction(data: SiteSettingPayload) {
     };
   }
 }
+
+export async function clearSiteSettingImageAction(field: "logoUrl" | "faviconUrl" | "openGraphImage") {
+  try {
+    await siteSettingService.updateSetting({ [field]: null });
+    revalidatePath("/");
+    revalidatePath("/admin/settings");
+    return { success: true };
+  } catch (error: unknown) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Gagal menghapus pengaturan situs." 
+    };
+  }
+}

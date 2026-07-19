@@ -45,8 +45,15 @@ export async function PublicShell({
       <VisitorTracker />
       <header className="sticky top-0 z-50 border-b border-black/10 bg-[#f7f7f4]/85 backdrop-blur-xl">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <Link href="/" className="text-sm font-semibold tracking-wide">
-            {name}
+          <Link href="/" className="flex items-center text-sm font-semibold tracking-wide">
+            {settings?.logoUrl ? (
+              <>
+                <img src={settings.logoUrl} alt={name} className="h-7 w-auto object-contain mr-2" />
+                <span>{name}</span>
+              </>
+            ) : (
+              <span>{name}</span>
+            )}
           </Link>
           <div className="hidden items-center gap-6 text-sm font-medium text-black/60 md:flex">
             {navItems.map((item) => (

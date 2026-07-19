@@ -10,6 +10,7 @@ export class AdminRepository {
       educations,
       certificates,
       visitors,
+      researches,
     ] = await Promise.all([
       prisma.project.count(),
       prisma.technology.count(),
@@ -18,6 +19,7 @@ export class AdminRepository {
       prisma.education.count(),
       prisma.certificate.count(),
       prisma.visitor.count(),
+      prisma.research.count(),
     ]);
 
     return {
@@ -28,6 +30,7 @@ export class AdminRepository {
       educations,
       certificates,
       visitors,
+      researches,
     };
   }
 

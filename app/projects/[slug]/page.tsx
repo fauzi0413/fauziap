@@ -6,6 +6,7 @@ import { FaGithub } from "react-icons/fa";
 import { portfolioService } from "@/services/portfolio";
 import { EmptyState } from "@/components/public/EmptyState";
 import { ProjectCard } from "@/components/public/ProjectCard";
+import { ProjectGallery } from "@/components/public/ProjectGallery";
 import { PublicShell } from "@/components/public/PublicShell";
 
 export const dynamic = "force-dynamic";
@@ -178,15 +179,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         </section>
         <section className="mx-auto max-w-7xl px-5 pb-16">
           <h2 className="text-2xl font-semibold">Gallery Screenshot</h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {project.images.map((image) => (
-              <div key={image.id} className="overflow-hidden rounded-lg border border-black/10 bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={image.imageUrl} alt={image.altText ?? project.title} className="aspect-[16/10] w-full object-cover" />
-              </div>
-            ))}
-          </div>
-          {project.images.length === 0 ? <EmptyState title="Gallery belum terisi" description="Silahkan tambahkan gambar projek untuk melengkapi halaman ini." /> : null}
+          <ProjectGallery images={project.images} projectTitle={project.title} />
         </section>
         <section className="mx-auto max-w-7xl px-5 pb-16">
           <div className="flex items-end justify-between gap-4">
